@@ -1,12 +1,14 @@
 package com.github.ldavid432;
 
-import static com.github.ldavid432.GauntletLootPlugin.THE_GAUNTLET;
+import com.github.ldavid432.config.GauntletChestColor;
+import com.github.ldavid432.config.GauntletTitle;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.List;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import lombok.Getter;
@@ -27,21 +29,24 @@ public class GauntletLootOverlay extends Overlay
 	private final Client client;
 	private final ItemManager itemManager;
 	private final SpriteManager spriteManager;
+	private final GauntletLootConfig config;
 
 	private BufferedImage closeButtonImage;
 	private final BufferedImage backgroundImage;
+	private final BufferedImage[] chestImageCache = new BufferedImage[GauntletChestColor.values().length];
 
 	@Getter
 	private Rectangle closeButtonBounds;
 
 	@Inject
-	public GauntletLootOverlay(@Nullable GauntletLootPlugin plugin, Client client, ItemManager itemManager, SpriteManager spriteManager)
+	public GauntletLootOverlay(@Nullable GauntletLootPlugin plugin, Client client, ItemManager itemManager, SpriteManager spriteManager, GauntletLootConfig config)
 	{
 		super(plugin);
 		this.plugin = plugin;
 		this.client = client;
 		this.itemManager = itemManager;
 		this.spriteManager = spriteManager;
+		this.config = config;
 
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
@@ -58,6 +63,32 @@ public class GauntletLootOverlay extends Overlay
 			closeButtonImage = spriteManager.getSprite(1731, 0);
 		}
 		return closeButtonImage;
+	}
+
+	@Nullable
+	public BufferedImage getChestImage(GauntletChestColor color)
+	{
+		BufferedImage image = chestImageCache[color.ordinal()];
+		if (image == null)
+		{
+			image = ImageUtil.loadImageResource(getClass(), color.getPath());
+			chestImageCache[color.ordinal()] = image;
+		}
+		return image;
+	}
+
+	@Nonnull
+	public String getChestTitle(GauntletTitle title)
+	{
+		switch (title)
+		{
+			case CORRUPTED_GAUNTLET:
+				return "The Corrupted Gauntlet";
+			case CUSTOM:
+				return config.getChestCustomTitle();
+			default:
+				return "The Gauntlet";
+		}
 	}
 
 	// Based on https://github.com/lalochazia/missed-clues
@@ -92,6 +123,12 @@ public class GauntletLootOverlay extends Overlay
 			int incY = startY - 40;
 			graphics.drawImage(backgroundImage, incX, incY, null);
 
+			BufferedImage chestImage = getChestImage(config.getChestSpriteColor());
+			if (chestImage != null)
+			{
+				graphics.drawImage(chestImage, incX, incY, null);
+			}
+
 			renderTitle(graphics, incX, incY);
 
 			final BufferedImage closeButtonImage = getCloseButtonImage();
@@ -108,14 +145,21 @@ public class GauntletLootOverlay extends Overlay
 
 	private void renderTitle(Graphics2D graphics, int incX, int incY)
 	{
+		String title = getChestTitle(config.getChestTitle());
 		graphics.setFont(FontManager.getRunescapeBoldFont());
-		Rectangle titleBounds = graphics.getFontMetrics().getStringBounds(THE_GAUNTLET, graphics).getBounds();
+
+		// Measure
+		Rectangle titleBounds = graphics.getFontMetrics().getStringBounds(title, graphics).getBounds();
 		int titleX = incX + (backgroundImage.getWidth() / 2) - ((int) titleBounds.getWidth() / 2);
 		int titleY = incY + 25;
+
+		// Draw shadow
 		graphics.setColor(Color.BLACK);
-		graphics.drawString(THE_GAUNTLET, titleX + 1, titleY + 1);
+		graphics.drawString(title, titleX + 1, titleY + 1);
+
+		// Draw actual text
 		graphics.setColor(JagexColors.DARK_ORANGE_INTERFACE_TEXT);
-		graphics.drawString(THE_GAUNTLET, incX + (backgroundImage.getWidth() / 2) - ((int) titleBounds.getWidth() / 2), incY + 25);
+		graphics.drawString(title, incX + (backgroundImage.getWidth() / 2) - ((int) titleBounds.getWidth() / 2), incY + 25);
 	}
 
 	private void renderCloseButton(Graphics2D graphics, BufferedImage closeButtonImage, int incX, int incY)

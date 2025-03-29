@@ -1,6 +1,7 @@
 package com.github.ldavid432;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Provides;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -14,6 +15,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.ItemID;
+import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemStack;
 import net.runelite.client.input.MouseAdapter;
@@ -23,17 +26,16 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.loottracker.LootReceived;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.http.api.loottracker.LootRecordType;
 
 @Slf4j
 @PluginDescriptor(
 	name = "Gauntlet Chest Popup",
 	description = "Barrows-chest style UI for the gauntlet chest!",
-	tags = {"gauntlet", "loot", "chest"}
+	tags = {"gauntlet", "loot", "chest", "sound"}
 )
 public class GauntletLootPlugin extends Plugin
 {
-	static final String THE_GAUNTLET = "The Gauntlet";
-
 	@Inject
 	private Client client;
 
@@ -45,6 +47,9 @@ public class GauntletLootPlugin extends Plugin
 
 	@Inject
 	private GauntletLootOverlay overlay;
+
+	@Inject
+	private GauntletLootConfig config;
 
 	@Getter
 	@Setter
@@ -70,14 +75,42 @@ public class GauntletLootPlugin extends Plugin
 	@Subscribe
 	public void onLootReceived(LootReceived event)
 	{
-		if (!Objects.equals(event.getName(), THE_GAUNTLET))
+		if (!Objects.equals(event.getName(), "The Gauntlet"))
 		{
 			return;
 		}
 
-		log.debug("Displaying Gauntlet Loot");
+		log.debug("Displaying Gauntlet loot");
 
 		lootedItems = ImmutableList.copyOf(event.getItems());
+
+		if (lootedItems.stream().anyMatch(this::shouldPlayRareSound))
+		{
+			log.debug("Playing rare item sound for Gauntlet loot");
+			// Muspah rare item sound
+			client.playSoundEffect(6765);
+		}
+	}
+
+	private boolean shouldPlayRareSound(ItemStack stack)
+	{
+		switch (stack.getId())
+		{
+			case ItemID.CRYSTAL_WEAPON_SEED:
+				return config.shouldPlayWeaponSeedSound();
+			case ItemID.CRYSTAL_ARMOUR_SEED:
+				return config.shouldPlayArmourSeedSound();
+			case ItemID.ENHANCED_CRYSTAL_WEAPON_SEED:
+				return config.shouldPlayEnhancedSeedSound();
+			default:
+				return false;
+		}
+	}
+
+	@Provides
+	GauntletLootConfig provideConfig(ConfigManager configManager)
+	{
+		return configManager.getConfig(GauntletLootConfig.class);
 	}
 
 	private final KeyListener keyListener = new KeyAdapter()
