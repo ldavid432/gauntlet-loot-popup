@@ -7,7 +7,7 @@
 
 ## Customization
 
-- Chest sprite color 
+- Chest sprite color
   - original (light blue), corrupted (red), blue, green, yellow, white, purple
 - Chest title
 - Which items the rare item sound is played for
@@ -15,7 +15,7 @@
 
 ### Other Notes
 
-- Can be closed with the close icon or by pressing ESC.
+- Can be closed with the close icon, by pressing ESC or by clicking outside the popup (if that setting is enabled).
 - From my testing this *Should* be included in screenshots taken by the `Screenshots` plugin.
 
 

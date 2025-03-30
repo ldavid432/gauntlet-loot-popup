@@ -1,5 +1,6 @@
 package com.github.ldavid432;
 
+import static com.github.ldavid432.Util.anyMenuEntry;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Provides;
 import java.awt.event.KeyAdapter;
@@ -14,10 +15,18 @@ import javax.inject.Inject;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.ItemID;
+import net.runelite.api.Menu;
+import net.runelite.api.MenuAction;
+import net.runelite.api.MenuEntry;
+import net.runelite.api.Point;
+import net.runelite.api.events.ClientTick;
+import net.runelite.api.events.MenuShouldLeftClick;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemStack;
 import net.runelite.client.input.MouseAdapter;
 import net.runelite.client.input.MouseListener;
@@ -25,7 +34,9 @@ import net.runelite.client.input.MouseManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.loottracker.LootReceived;
+import net.runelite.client.ui.JagexColors;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.ColorUtil;
 import net.runelite.http.api.loottracker.LootRecordType;
 
 @Slf4j
@@ -36,11 +47,16 @@ import net.runelite.http.api.loottracker.LootRecordType;
 )
 public class GauntletLootPlugin extends Plugin
 {
+	private static final int MENU_EXAMINE_ID = -1_337_000;
+
 	@Inject
 	private Client client;
 
 	@Inject
 	private MouseManager mouseManager;
+
+	@Inject
+	private ItemManager itemManager;
 
 	@Inject
 	private OverlayManager overlayManager;
@@ -55,6 +71,9 @@ public class GauntletLootPlugin extends Plugin
 	@Setter
 	@Nonnull
 	private List<ItemStack> lootedItems = Collections.emptyList();
+
+	@Getter
+	private boolean closeClicked = false;
 
 	@Override
 	protected void startUp() throws Exception
@@ -72,6 +91,16 @@ public class GauntletLootPlugin extends Plugin
 		overlayManager.remove(overlay);
 	}
 
+	boolean isDisplayed()
+	{
+		return !lootedItems.isEmpty();
+	}
+
+	void clearLoot()
+	{
+		lootedItems = Collections.emptyList();
+	}
+
 	@Subscribe
 	public void onLootReceived(LootReceived event)
 	{
@@ -80,7 +109,7 @@ public class GauntletLootPlugin extends Plugin
 			return;
 		}
 
-		log.debug("Displaying Gauntlet loot");
+		log.debug("Displaying Gauntlet popup");
 
 		lootedItems = ImmutableList.copyOf(event.getItems());
 
@@ -89,6 +118,142 @@ public class GauntletLootPlugin extends Plugin
 			log.debug("Playing rare item sound for Gauntlet loot");
 			// Muspah rare item sound
 			client.playSoundEffect(6765);
+		}
+	}
+
+	@Provides
+	GauntletLootConfig provideConfig(ConfigManager configManager)
+	{
+		return configManager.getConfig(GauntletLootConfig.class);
+	}
+
+	private final KeyListener keyListener = new KeyAdapter()
+	{
+		@Override
+		public void keyPressed(KeyEvent e)
+		{
+			if (isDisplayed() && e.getKeyCode() == KeyEvent.VK_ESCAPE)
+			{
+				clearLoot();
+			}
+		}
+	};
+
+	private final MouseListener mouseListener = new MouseAdapter()
+	{
+		@Override
+		public MouseEvent mouseReleased(MouseEvent event)
+		{
+			if (closeClicked)
+			{
+				closeClicked = false;
+				clearLoot();
+				event.consume();
+			}
+			return event;
+		}
+
+		@Override
+		public MouseEvent mousePressed(MouseEvent event)
+		{
+			if (isDisplayed() && event.getButton() == 1)
+			{
+				if (overlay.isInBounds(event.getPoint()))
+				{
+					if (!client.isMenuOpen())
+					{
+						if (overlay.isInCloseButtonBounds(event.getPoint()))
+						{
+							log.debug("Gauntlet popup closed");
+							// Not really necessary but, set a var so we can see ~1 frame of the clicked close icon
+							closeClicked = true;
+						}
+						else if (config.isExamineEnabled())
+						{
+							Integer itemId = overlay.itemClicked(event.getPoint());
+							if (itemId != null)
+							{
+								// Don't consume event so the menu can be triggered
+								return event;
+							}
+						}
+
+						// Either Random click somewhere on the popup or close button
+						event.consume();
+					}
+				}
+				else if (config.isClickOutsideToDismissEnabled() &&
+					anyMenuEntry(client, (entry -> Objects.equals(entry.getOption(), "Walk here"))))
+				{
+					// Dismiss if clicked outside in the world (somewhere with 'Walk here')
+					//  This prevents dismissing when clicking UI elements like the inventory or chat
+					log.debug("Dismissing Gauntlet popup");
+					clearLoot();
+				}
+			}
+
+			return event;
+		}
+	};
+
+	@Subscribe
+	public void onClientTick(ClientTick clientTick)
+	{
+		if (isDisplayed() && config.isExamineEnabled() && !client.isMenuOpen())
+		{
+			Point rlMousePos = client.getMouseCanvasPosition();
+			java.awt.Point mousePos = new java.awt.Point(rlMousePos.getX(), rlMousePos.getY());
+
+			Integer itemId = overlay.itemClicked(mousePos);
+			if (itemId != null)
+			{
+				final String itemName = itemManager.getItemComposition(itemId).getName();
+
+				final Menu menu = client.getMenu();
+
+				MenuEntry examine = menu.createMenuEntry(0)
+					.setOption("Examine")
+					.setTarget(ColorUtil.wrapWithColorTag(itemName, JagexColors.MENU_TARGET))
+					.setType(MenuAction.RUNELITE)
+					.setItemId(itemId)
+					.setIdentifier(MENU_EXAMINE_ID)
+					.onClick(
+						(entry) -> {
+							log.debug("Examining Gauntlet popup item");
+							client.addChatMessage(ChatMessageType.ITEM_EXAMINE, "", getExamineText(entry.getItemId(), itemName), "");
+						}
+					);
+
+				MenuEntry cancel = menu.createMenuEntry(1)
+					.setOption("Cancel")
+					.setType(MenuAction.CANCEL);
+
+				menu.setMenuEntries(new MenuEntry[]{cancel, examine});
+			}
+			else if (overlay.isInCloseButtonBounds(mousePos))
+			{
+				final Menu menu = client.getMenu();
+
+				MenuEntry close = menu.createMenuEntry(0)
+					.setOption("Close")
+					.setType(MenuAction.RUNELITE)
+					.onClick((entry) -> closeClicked = true);
+
+				MenuEntry cancel = menu.createMenuEntry(1)
+					.setOption("Cancel")
+					.setType(MenuAction.CANCEL);
+
+				menu.setMenuEntries(new MenuEntry[]{cancel, close});
+			}
+		}
+	}
+
+	@Subscribe
+	public void onMenuShouldLeftClick(MenuShouldLeftClick event)
+	{
+		if (anyMenuEntry(client, (entry) -> entry.getIdentifier() == MENU_EXAMINE_ID))
+		{
+			event.setForceRightClick(true);
 		}
 	}
 
@@ -107,35 +272,23 @@ public class GauntletLootPlugin extends Plugin
 		}
 	}
 
-	@Provides
-	GauntletLootConfig provideConfig(ConfigManager configManager)
+	// For the few notable items return their actual examine text, otherwise just return the item name
+	private String getExamineText(int itemId, String itemName)
 	{
-		return configManager.getConfig(GauntletLootConfig.class);
+		switch (itemId)
+		{
+			case ItemID.CRYSTAL_SHARD:
+				return "A shard of the finest crystal, from the crystal city itself.";
+			case ItemID.CRYSTAL_WEAPON_SEED:
+				return "A seed to be sung into the finest crystal weapons.";
+			case ItemID.CRYSTAL_ARMOUR_SEED:
+				return "A seed to be sung into the finest crystal armour.";
+			case ItemID.ENHANCED_CRYSTAL_WEAPON_SEED:
+				return "A seed to be sung into the most powerful crystal weaponry.";
+			case ItemID.GAUNTLET_CAPE:
+				return "Earned by only the most accomplished warriors of Prifddinas.";
+			default:
+				return itemName;
+		}
 	}
-
-	private final KeyListener keyListener = new KeyAdapter()
-	{
-		@Override
-		public void keyPressed(KeyEvent e)
-		{
-			if (!lootedItems.isEmpty() && e.getKeyCode() == KeyEvent.VK_ESCAPE)
-			{
-				lootedItems = Collections.emptyList();
-			}
-		}
-	};
-
-	private final MouseListener mouseListener = new MouseAdapter()
-	{
-		@Override
-		public MouseEvent mousePressed(MouseEvent event)
-		{
-			if (!lootedItems.isEmpty() && overlay.getCloseButtonBounds() != null && overlay.getCloseButtonBounds().contains(event.getPoint()))
-			{
-				lootedItems = Collections.emptyList();
-				event.consume();
-			}
-			return event;
-		}
-	};
 }

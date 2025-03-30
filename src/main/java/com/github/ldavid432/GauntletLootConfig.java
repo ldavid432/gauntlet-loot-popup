@@ -13,9 +13,39 @@ public interface GauntletLootConfig extends Config
 	String GROUP = "gauntletchestpopup";
 
 	@ConfigItem(
+		name = "Click outside to dismiss",
+		description = "Allows clicking outside the popup to dismiss it",
+		keyName = "clickOutsideToDismiss",
+		position = 0
+	)
+	default boolean isClickOutsideToDismissEnabled()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		name = "Examine items",
+		description = "Adds a menu option to examine loot items",
+		keyName = "examineItems",
+		position = 1
+	)
+	default boolean isExamineEnabled()
+	{
+		return true;
+	}
+
+	@ConfigSection(
+		name = "Chest theme",
+		description = "Configure the look of the chest loot UI",
+		position = 2
+	)
+	String chestSection = "chestSection";
+
+	@ConfigItem(
 		name = "Chest Sprite Color",
 		description = "Select the color for the chest sprite on the UI (Does not recolor the physical chest object)",
 		keyName = "chestSpriteColor",
+		section = chestSection,
 		position = 0
 	)
 	default GauntletChestColor getChestSpriteColor()
@@ -27,6 +57,7 @@ public interface GauntletLootConfig extends Config
 		name = "Chest Title",
 		description = "Customize the title text",
 		keyName = "chestTitleText",
+		section = chestSection,
 		position = 1
 	)
 	default GauntletTitle getChestTitle()
@@ -38,6 +69,7 @@ public interface GauntletLootConfig extends Config
 		name = "Custom title",
 		description = "Custom title text, used if 'Chest Title' is set to 'Custom'",
 		keyName = "chestCustomTitleText",
+		section = chestSection,
 		position = 2
 	)
 	default String getChestCustomTitle()

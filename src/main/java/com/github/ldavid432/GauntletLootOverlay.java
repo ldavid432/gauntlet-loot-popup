@@ -1,17 +1,21 @@
 package com.github.ldavid432;
 
+import static com.github.ldavid432.Util.rectangleFromImage;
 import com.github.ldavid432.config.GauntletChestColor;
 import com.github.ldavid432.config.GauntletTitle;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import lombok.Getter;
 import net.runelite.api.Client;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemStack;
@@ -32,14 +36,16 @@ public class GauntletLootOverlay extends Overlay
 	private final GauntletLootConfig config;
 
 	private BufferedImage closeButtonImage;
+	private BufferedImage closeButtonClickedImage;
 	private final BufferedImage backgroundImage;
 	private final BufferedImage[] chestImageCache = new BufferedImage[GauntletChestColor.values().length];
 
-	@Getter
+	private Rectangle overallBounds;
 	private Rectangle closeButtonBounds;
+	private final Map<Integer, Rectangle> itemBounds = new HashMap<>();
 
 	@Inject
-	public GauntletLootOverlay(@Nullable GauntletLootPlugin plugin, Client client, ItemManager itemManager, SpriteManager spriteManager, GauntletLootConfig config)
+	public GauntletLootOverlay(GauntletLootPlugin plugin, Client client, ItemManager itemManager, SpriteManager spriteManager, GauntletLootConfig config)
 	{
 		super(plugin);
 		this.plugin = plugin;
@@ -58,11 +64,22 @@ public class GauntletLootOverlay extends Overlay
 	@Nullable
 	public BufferedImage getCloseButtonImage()
 	{
-		if (closeButtonImage == null)
+		if (plugin.isCloseClicked())
 		{
-			closeButtonImage = spriteManager.getSprite(1731, 0);
+			if (closeButtonClickedImage == null)
+			{
+				closeButtonClickedImage = spriteManager.getSprite(1732, 0);
+			}
+			return closeButtonClickedImage;
 		}
-		return closeButtonImage;
+		else
+		{
+			if (closeButtonImage == null)
+			{
+				closeButtonImage = spriteManager.getSprite(1731, 0);
+			}
+			return closeButtonImage;
+		}
 	}
 
 	@Nullable
@@ -95,8 +112,9 @@ public class GauntletLootOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		if (plugin.getLootedItems().isEmpty())
+		if (!plugin.isDisplayed())
 		{
+			resetBounds();
 			return null;
 		}
 
@@ -121,6 +139,7 @@ public class GauntletLootOverlay extends Overlay
 		{
 			int incX = startX - 110;
 			int incY = startY - 40;
+			overallBounds = rectangleFromImage(incX, incY, backgroundImage);
 			graphics.drawImage(backgroundImage, incX, incY, null);
 
 			BufferedImage chestImage = getChestImage(config.getChestSpriteColor());
@@ -167,11 +186,10 @@ public class GauntletLootOverlay extends Overlay
 		int closeX = incX + backgroundImage.getWidth() - closeButtonImage.getWidth() - 8;
 		int closeY = incY + 7;
 
-		closeButtonBounds = new Rectangle(
+		closeButtonBounds = rectangleFromImage(
 			closeX,
 			closeY,
-			closeButtonImage.getWidth(),
-			closeButtonImage.getHeight()
+			closeButtonImage
 		);
 
 		graphics.drawImage(closeButtonImage, closeX, closeY, null);
@@ -199,6 +217,8 @@ public class GauntletLootOverlay extends Overlay
 			{
 				graphics.drawImage(itemImage, x, y, null);
 
+				itemBounds.put(itemId, rectangleFromImage(x, y, itemImage));
+
 				if ((i + 1) % 3 == 0)
 				{
 					x = x - (itemImage.getWidth() + 5) * 2;
@@ -210,5 +230,38 @@ public class GauntletLootOverlay extends Overlay
 				}
 			}
 		}
+	}
+
+	private void resetBounds()
+	{
+		overallBounds = null;
+		closeButtonBounds = null;
+		itemBounds.clear();
+	}
+
+	public boolean isInBounds(Point point)
+	{
+		return overallBounds != null && overallBounds.contains(point);
+	}
+
+	public boolean isInCloseButtonBounds(Point point)
+	{
+		return closeButtonBounds != null && closeButtonBounds.contains(point);
+	}
+
+	public Integer itemClicked(Point point)
+	{
+		AtomicReference<Integer> id = new AtomicReference<>();
+
+		itemBounds.forEach(
+			(key, value) -> {
+				if (value.contains(point))
+				{
+					id.set(key);
+				}
+			}
+		);
+
+		return id.get();
 	}
 }
