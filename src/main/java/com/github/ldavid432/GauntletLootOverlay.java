@@ -3,7 +3,6 @@ package com.github.ldavid432;
 import static com.github.ldavid432.Util.*;
 import static com.github.ldavid432.Util.rectangleFromImage;
 import com.github.ldavid432.config.GauntletChestColor;
-import com.github.ldavid432.config.GauntletTitle;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -14,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import net.runelite.api.Client;
@@ -63,9 +61,9 @@ public class GauntletLootOverlay extends Overlay
 	}
 
 	@Nullable
-	public BufferedImage getCloseButtonImage()
+	private BufferedImage getCloseButtonImage()
 	{
-		if (plugin.isCloseClicked())
+		if (plugin.isClosing())
 		{
 			if (closeButtonClickedImage == null)
 			{
@@ -84,7 +82,7 @@ public class GauntletLootOverlay extends Overlay
 	}
 
 	@Nullable
-	public BufferedImage getChestImage(GauntletChestColor color)
+	private BufferedImage getChestImage(GauntletChestColor color)
 	{
 		BufferedImage image = chestImageCache[color.ordinal()];
 		if (image == null)
@@ -93,20 +91,6 @@ public class GauntletLootOverlay extends Overlay
 			chestImageCache[color.ordinal()] = image;
 		}
 		return image;
-	}
-
-	@Nonnull
-	public String getChestTitle(GauntletTitle title)
-	{
-		switch (title)
-		{
-			case CORRUPTED_GAUNTLET:
-				return "The Corrupted Gauntlet";
-			case CUSTOM:
-				return config.getChestCustomTitle();
-			default:
-				return "The Gauntlet";
-		}
 	}
 
 	// Based on https://github.com/lalochazia/missed-clues
@@ -165,7 +149,7 @@ public class GauntletLootOverlay extends Overlay
 
 	private void renderTitle(Graphics2D graphics, int incX, int incY)
 	{
-		String title = getChestTitle(config.getChestTitle());
+		String title = config.getChestTitle().getText(config);
 		graphics.setFont(FontManager.getRunescapeBoldFont());
 
 		// Measure
@@ -250,7 +234,7 @@ public class GauntletLootOverlay extends Overlay
 		return closeButtonBounds != null && closeButtonBounds.contains(point);
 	}
 
-	public Integer itemClicked(Point point)
+	public Integer getItemClicked(Point point)
 	{
 		AtomicReference<Integer> id = new AtomicReference<>();
 

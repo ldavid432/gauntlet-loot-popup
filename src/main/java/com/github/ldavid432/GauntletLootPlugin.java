@@ -73,7 +73,7 @@ public class GauntletLootPlugin extends Plugin
 	private List<ItemStack> lootedItems = Collections.emptyList();
 
 	@Getter
-	private boolean closeClicked = false;
+	private boolean closing = false;
 
 	@Override
 	protected void startUp() throws Exception
@@ -144,9 +144,9 @@ public class GauntletLootPlugin extends Plugin
 		@Override
 		public MouseEvent mouseReleased(MouseEvent event)
 		{
-			if (closeClicked)
+			if (closing)
 			{
-				closeClicked = false;
+				closing = false;
 				clearLoot();
 				event.consume();
 			}
@@ -166,11 +166,11 @@ public class GauntletLootPlugin extends Plugin
 						{
 							log.debug("Gauntlet popup closed");
 							// Not really necessary but, set a var so we can see ~1 frame of the clicked close icon
-							closeClicked = true;
+							closing = true;
 						}
 						else if (config.isExamineEnabled())
 						{
-							Integer itemId = overlay.itemClicked(event.getPoint());
+							Integer itemId = overlay.getItemClicked(event.getPoint());
 							if (itemId != null)
 							{
 								// Don't consume event so the menu can be triggered
@@ -204,7 +204,7 @@ public class GauntletLootPlugin extends Plugin
 			Point rlMousePos = client.getMouseCanvasPosition();
 			java.awt.Point mousePos = new java.awt.Point(rlMousePos.getX(), rlMousePos.getY());
 
-			Integer itemId = overlay.itemClicked(mousePos);
+			Integer itemId = overlay.getItemClicked(mousePos);
 			if (itemId != null)
 			{
 				final String itemName = itemManager.getItemComposition(itemId).getName();
@@ -237,7 +237,7 @@ public class GauntletLootPlugin extends Plugin
 				MenuEntry close = menu.createMenuEntry(0)
 					.setOption("Close")
 					.setType(MenuAction.RUNELITE)
-					.onClick((entry) -> closeClicked = true);
+					.onClick((entry) -> closing = true);
 
 				MenuEntry cancel = menu.createMenuEntry(1)
 					.setOption("Cancel")
