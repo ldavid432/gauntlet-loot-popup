@@ -18,4 +18,11 @@ public class Util
 	{
 		return Arrays.stream(client.getMenu().getMenuEntries()).anyMatch(predicate);
 	}
+
+	static final int BACKGROUND_WIDTH = 230;
+	static final int BACKGROUND_HEIGHT = 200;
+
+	static final int CHEST_WIDTH = 112;
+	static final int CHEST_HEIGHT = 126;
+	static final int CHEST_OFFSET = 7;
 }

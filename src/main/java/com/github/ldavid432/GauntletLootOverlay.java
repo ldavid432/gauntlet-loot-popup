@@ -1,5 +1,6 @@
 package com.github.ldavid432;
 
+import static com.github.ldavid432.Util.*;
 import static com.github.ldavid432.Util.rectangleFromImage;
 import com.github.ldavid432.config.GauntletChestColor;
 import com.github.ldavid432.config.GauntletTitle;
@@ -126,8 +127,8 @@ public class GauntletLootOverlay extends Overlay
 
 		if (canvasWidth <= 1000 && canvasHeight <= 650)
 		{
-			startX = (canvasWidth - 230) / 2;
-			startY = (canvasHeight - 200) / 2;
+			startX = (canvasWidth - BACKGROUND_WIDTH) / 2;
+			startY = (canvasHeight - BACKGROUND_HEIGHT) / 2;
 		}
 		else
 		{
@@ -145,7 +146,7 @@ public class GauntletLootOverlay extends Overlay
 			BufferedImage chestImage = getChestImage(config.getChestSpriteColor());
 			if (chestImage != null)
 			{
-				graphics.drawImage(chestImage, incX, incY, null);
+				graphics.drawImage(chestImage, incX + CHEST_OFFSET, incY + BACKGROUND_HEIGHT - CHEST_HEIGHT - CHEST_OFFSET, null);
 			}
 
 			renderTitle(graphics, incX, incY);
