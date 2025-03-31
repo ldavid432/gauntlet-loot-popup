@@ -13,11 +13,13 @@
 - Which items the rare item sound is played for
   - Weapon seed, Armour seed and/or Enhanced seed
 
+If you'd like to preview your customization you can run the command (type in chat) `::gauntletlootpreview`.
+This will bring up the popup with some fake loot.
+
 ### Other Notes
 
 - Can be closed with the close icon, by pressing ESC or by clicking outside the popup (if that setting is enabled).
 - From my testing this *Should* be included in screenshots taken by the `Screenshots` plugin.
-
 
 ### Screenshots
 

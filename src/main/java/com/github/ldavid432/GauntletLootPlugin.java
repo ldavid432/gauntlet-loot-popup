@@ -22,7 +22,9 @@ import net.runelite.api.Menu;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.Point;
+import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.ClientTick;
+import net.runelite.api.events.CommandExecuted;
 import net.runelite.api.events.MenuShouldLeftClick;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -99,6 +101,31 @@ public class GauntletLootPlugin extends Plugin
 	void clearLoot()
 	{
 		lootedItems = Collections.emptyList();
+	}
+
+	@Subscribe
+	public void onCommandExecuted(CommandExecuted event)
+	{
+		// For debugging and previewing your theme
+		if (event.getCommand().equals("gauntletlootpreview"))
+		{
+			log.debug("Displaying Gauntlet loot preview");
+
+			onLootReceived(
+				new LootReceived(
+					"The Gauntlet",
+					-1,
+					null,
+					List.of(
+						new ItemStack(ItemID.NATURE_RUNE, 130),
+						new ItemStack(ItemID.CRYSTAL_SHARD, 8),
+						new ItemStack(ItemID.RUNE_FULL_HELM + 1, 4),
+						new ItemStack(ItemID.RUNE_PICKAXE + 1, 3)
+					),
+					1
+				)
+			);
+		}
 	}
 
 	@Subscribe
