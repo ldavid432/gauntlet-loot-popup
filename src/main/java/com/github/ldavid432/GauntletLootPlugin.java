@@ -17,7 +17,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
-import net.runelite.api.ItemID;
 import net.runelite.api.Menu;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
@@ -26,6 +25,7 @@ import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.CommandExecuted;
 import net.runelite.api.events.MenuShouldLeftClick;
+import net.runelite.api.gameval.ItemID;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
@@ -114,8 +114,8 @@ public class GauntletLootPlugin extends Plugin
 					-1,
 					null,
 					List.of(
-						new ItemStack(ItemID.NATURE_RUNE, 130),
-						new ItemStack(ItemID.CRYSTAL_SHARD, 8),
+						new ItemStack(ItemID.NATURERUNE, 130),
+						new ItemStack(ItemID.PRIF_CRYSTAL_SHARD, 8),
 						new ItemStack(ItemID.RUNE_FULL_HELM + 1, 4),
 						new ItemStack(ItemID.RUNE_PICKAXE + 1, 3)
 					),
@@ -272,11 +272,11 @@ public class GauntletLootPlugin extends Plugin
 	{
 		switch (stack.getId())
 		{
-			case ItemID.CRYSTAL_WEAPON_SEED:
+			case ItemID.CRYSTAL_SEED_OLD:
 				return config.shouldPlayWeaponSeedSound();
-			case ItemID.CRYSTAL_ARMOUR_SEED:
+			case ItemID.PRIF_ARMOUR_SEED:
 				return config.shouldPlayArmourSeedSound();
-			case ItemID.ENHANCED_CRYSTAL_WEAPON_SEED:
+			case ItemID.PRIF_WEAPON_SEED_ENHANCED:
 				return config.shouldPlayEnhancedSeedSound();
 			default:
 				return false;
@@ -288,15 +288,15 @@ public class GauntletLootPlugin extends Plugin
 	{
 		switch (itemId)
 		{
-			case ItemID.CRYSTAL_SHARD:
+			case ItemID.PRIF_CRYSTAL_SHARD:
 				return "A shard of the finest crystal, from the crystal city itself.";
-			case ItemID.CRYSTAL_WEAPON_SEED:
+			case ItemID.CRYSTAL_SEED_OLD:
 				return "A seed to be sung into the finest crystal weapons.";
-			case ItemID.CRYSTAL_ARMOUR_SEED:
+			case ItemID.PRIF_ARMOUR_SEED:
 				return "A seed to be sung into the finest crystal armour.";
-			case ItemID.ENHANCED_CRYSTAL_WEAPON_SEED:
+			case ItemID.PRIF_WEAPON_SEED_ENHANCED:
 				return "A seed to be sung into the most powerful crystal weaponry.";
-			case ItemID.GAUNTLET_CAPE:
+			case ItemID.GAUNTLET_CRYSTALLINE_CAPE:
 				return "Earned by only the most accomplished warriors of Prifddinas.";
 			default:
 				return itemName;
