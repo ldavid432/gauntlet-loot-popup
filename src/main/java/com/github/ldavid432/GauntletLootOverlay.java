@@ -35,7 +35,7 @@ public class GauntletLootOverlay extends Overlay
 	private final GauntletLootConfig config;
 
 	private BufferedImage closeButtonImage;
-	private BufferedImage closeButtonClickedImage;
+	private BufferedImage closeButtonHoveredImage;
 	private final BufferedImage backgroundImage;
 	private final BufferedImage[] chestImageCache = new BufferedImage[GauntletChestColor.values().length];
 
@@ -63,13 +63,14 @@ public class GauntletLootOverlay extends Overlay
 	@Nullable
 	private BufferedImage getCloseButtonImage()
 	{
-		if (plugin.isClosing())
+		net.runelite.api.Point rlMousePos = client.getMouseCanvasPosition();
+		if (closeButtonBounds != null && closeButtonBounds.contains(new Point(rlMousePos.getX(), rlMousePos.getY())))
 		{
-			if (closeButtonClickedImage == null)
+			if (closeButtonHoveredImage == null)
 			{
-				closeButtonClickedImage = spriteManager.getSprite(1732, 0);
+				closeButtonHoveredImage = spriteManager.getSprite(1732, 0);
 			}
-			return closeButtonClickedImage;
+			return closeButtonHoveredImage;
 		}
 		else
 		{

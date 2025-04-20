@@ -74,9 +74,6 @@ public class GauntletLootPlugin extends Plugin
 	@Nonnull
 	private List<ItemStack> lootedItems = Collections.emptyList();
 
-	@Getter
-	private boolean closing = false;
-
 	@Override
 	protected void startUp() throws Exception
 	{
@@ -169,18 +166,6 @@ public class GauntletLootPlugin extends Plugin
 	private final MouseListener mouseListener = new MouseAdapter()
 	{
 		@Override
-		public MouseEvent mouseReleased(MouseEvent event)
-		{
-			if (closing)
-			{
-				closing = false;
-				clearLoot();
-				event.consume();
-			}
-			return event;
-		}
-
-		@Override
 		public MouseEvent mousePressed(MouseEvent event)
 		{
 			if (isDisplayed() && event.getButton() == 1)
@@ -192,8 +177,7 @@ public class GauntletLootPlugin extends Plugin
 						if (overlay.isInCloseButtonBounds(event.getPoint()))
 						{
 							log.debug("Gauntlet popup closed");
-							// Not really necessary but, set a var so we can see ~1 frame of the clicked close icon
-							closing = true;
+							clearLoot();
 						}
 						else if (config.isExamineEnabled())
 						{
