@@ -229,7 +229,7 @@ public class GauntletLootPlugin extends Plugin
 					.setItemId(itemId)
 					.setIdentifier(MENU_EXAMINE_ID)
 					.onClick(
-						(entry) -> {
+						entry -> {
 							log.debug("Examining Gauntlet popup item");
 							client.addChatMessage(ChatMessageType.ITEM_EXAMINE, "", getExamineText(entry.getItemId(), itemName), "");
 						}
@@ -248,7 +248,7 @@ public class GauntletLootPlugin extends Plugin
 				MenuEntry close = menu.createMenuEntry(0)
 					.setOption("Close")
 					.setType(MenuAction.RUNELITE)
-					.onClick((entry) -> clearLoot());
+					.onClick(entry -> clearLoot());
 
 				MenuEntry cancel = menu.createMenuEntry(1)
 					.setOption("Cancel")
@@ -273,8 +273,8 @@ public class GauntletLootPlugin extends Plugin
 	@Subscribe
 	public void onMenuShouldLeftClick(MenuShouldLeftClick event)
 	{
-		// Make the menu on left click when over on an item
-		if (anyMenuEntry(client, (entry) -> entry.getIdentifier() == MENU_EXAMINE_ID))
+		// Make the menu open on a left click when over on an item
+		if (anyMenuEntry(client, entry -> entry.getIdentifier() == MENU_EXAMINE_ID))
 		{
 			event.setForceRightClick(true);
 		}
