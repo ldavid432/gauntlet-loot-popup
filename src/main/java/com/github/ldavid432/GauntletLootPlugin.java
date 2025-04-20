@@ -210,13 +210,13 @@ public class GauntletLootPlugin extends Plugin
 	@Subscribe
 	public void onClientTick(ClientTick clientTick)
 	{
-		if (isDisplayed() && config.isExamineEnabled() && !client.isMenuOpen())
+		if (isDisplayed() && !client.isMenuOpen())
 		{
 			Point rlMousePos = client.getMouseCanvasPosition();
 			java.awt.Point mousePos = new java.awt.Point(rlMousePos.getX(), rlMousePos.getY());
 
 			Integer itemId = overlay.getItemClicked(mousePos);
-			if (itemId != null)
+			if (config.isExamineEnabled() && itemId != null)
 			{
 				final String itemName = itemManager.getItemComposition(itemId).getName();
 
@@ -255,6 +255,17 @@ public class GauntletLootPlugin extends Plugin
 					.setType(MenuAction.CANCEL);
 
 				menu.setMenuEntries(new MenuEntry[]{cancel, close});
+			}
+			else if (overlay.isInBounds(mousePos))
+			{
+				// Prevent actions from behind the overlay from showing
+				final Menu menu = client.getMenu();
+
+				MenuEntry cancel = menu.createMenuEntry(1)
+					.setOption("Cancel")
+					.setType(MenuAction.CANCEL);
+
+				menu.setMenuEntries(new MenuEntry[]{cancel});
 			}
 		}
 	}
