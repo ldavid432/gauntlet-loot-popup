@@ -7,7 +7,7 @@ import java.util.function.Predicate;
 import net.runelite.api.Client;
 import net.runelite.api.MenuEntry;
 
-public class Util
+public class GauntletLootUtil
 {
 	static Rectangle rectangleFromImage(int x, int y, BufferedImage image)
 	{

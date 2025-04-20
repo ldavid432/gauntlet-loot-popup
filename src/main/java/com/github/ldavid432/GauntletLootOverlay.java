@@ -1,7 +1,7 @@
 package com.github.ldavid432;
 
-import static com.github.ldavid432.Util.*;
-import static com.github.ldavid432.Util.rectangleFromImage;
+import static com.github.ldavid432.GauntletLootUtil.*;
+import static com.github.ldavid432.GauntletLootUtil.rectangleFromImage;
 import com.github.ldavid432.config.GauntletChestColor;
 import java.awt.Color;
 import java.awt.Dimension;

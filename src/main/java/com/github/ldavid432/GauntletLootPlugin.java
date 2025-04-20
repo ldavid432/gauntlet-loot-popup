@@ -1,6 +1,6 @@
 package com.github.ldavid432;
 
-import static com.github.ldavid432.Util.anyMenuEntry;
+import static com.github.ldavid432.GauntletLootUtil.anyMenuEntry;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Provides;
 import java.awt.event.KeyAdapter;
@@ -17,13 +17,14 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
+import net.runelite.api.GameState;
 import net.runelite.api.Menu;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.Point;
-import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.CommandExecuted;
+import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.MenuShouldLeftClick;
 import net.runelite.api.gameval.ItemID;
 import net.runelite.client.config.ConfigManager;
@@ -39,12 +40,11 @@ import net.runelite.client.plugins.loottracker.LootReceived;
 import net.runelite.client.ui.JagexColors;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ColorUtil;
-import net.runelite.http.api.loottracker.LootRecordType;
 
 @Slf4j
 @PluginDescriptor(
 	name = "Gauntlet Chest Popup",
-	description = "Barrows-chest style UI for the gauntlet chest!",
+	description = "Barrows chest style UI for the gauntlet chest!",
 	tags = {"gauntlet", "loot", "chest", "sound"}
 )
 public class GauntletLootPlugin extends Plugin
@@ -95,7 +95,7 @@ public class GauntletLootPlugin extends Plugin
 		return !lootedItems.isEmpty();
 	}
 
-	void clearLoot()
+	private void clearLoot()
 	{
 		lootedItems = Collections.emptyList();
 	}
@@ -248,7 +248,7 @@ public class GauntletLootPlugin extends Plugin
 				MenuEntry close = menu.createMenuEntry(0)
 					.setOption("Close")
 					.setType(MenuAction.RUNELITE)
-					.onClick((entry) -> closing = true);
+					.onClick((entry) -> clearLoot());
 
 				MenuEntry cancel = menu.createMenuEntry(1)
 					.setOption("Cancel")
@@ -262,9 +262,20 @@ public class GauntletLootPlugin extends Plugin
 	@Subscribe
 	public void onMenuShouldLeftClick(MenuShouldLeftClick event)
 	{
+		// Make the menu on left click when over on an item
 		if (anyMenuEntry(client, (entry) -> entry.getIdentifier() == MENU_EXAMINE_ID))
 		{
 			event.setForceRightClick(true);
+		}
+	}
+
+	@Subscribe
+	public void onGameStateChanged(GameStateChanged event)
+	{
+		// Reset on logout
+		if (event.getGameState() == GameState.LOGIN_SCREEN && isDisplayed())
+		{
+			clearLoot();
 		}
 	}
 
