@@ -2,6 +2,7 @@ package com.github.ldavid432;
 
 import com.github.ldavid432.config.GauntletChestColor;
 import com.github.ldavid432.config.GauntletTitle;
+import com.github.ldavid432.config.GauntletTitle2;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -43,27 +44,58 @@ public interface GauntletLootConfig extends Config
 
 	@ConfigItem(
 		name = "Chest Sprite Color",
-		description = "Select the color for the chest sprite on the UI (Does not recolor the physical chest object)",
+		description = "Select the color for the chest sprite on the UI (Does not recolor the physical chest object)<br>" +
+			"'Auto' selects either original or corrupted based on what you completed",
 		keyName = "chestSpriteColor",
 		section = chestSection,
 		position = 0
 	)
 	default GauntletChestColor getChestSpriteColor()
 	{
-		return GauntletChestColor.ORIGINAL;
+		return GauntletChestColor.AUTO;
 	}
 
 	@ConfigItem(
-		name = "Chest Title",
-		description = "Customize the title text",
+		name = "Chest Title (legacy)",
+		description = "Customize the title text (legacy)",
 		keyName = "chestTitleText",
+		section = chestSection,
+		position = 1,
+		hidden = true
+	)
+	default GauntletTitle getChestTitleLegacy()
+	{
+		return GauntletTitle.UNSET;
+	}
+
+	@ConfigItem(
+		name = "",
+		description = "",
+		keyName = "chestTitleText"
+	)
+	void setChestTitleLegacy(GauntletTitle title);
+
+	@ConfigItem(
+		name = "Chest Title",
+		description = "Customize the title text<br>" +
+			"Gauntlet - Either 'The Gauntlet' or 'The Corrupted Gauntlet'<br>" +
+			"Hunllef - Either 'Crystalline Hunllef' or 'Corrupted Hunllef'<br>" +
+			"Custom - Title set in 'Custom title' below ",
+		keyName = "chestTitleText2",
 		section = chestSection,
 		position = 1
 	)
-	default GauntletTitle getChestTitle()
+	default GauntletTitle2 getChestTitle2()
 	{
-		return GauntletTitle.GAUNTLET;
+		return GauntletTitle2.GAUNTLET;
 	}
+
+	@ConfigItem(
+		name = "",
+		description = "",
+		keyName = "chestTitleText2"
+	)
+	void setChestTitle2(GauntletTitle2 title);
 
 	@ConfigItem(
 		name = "Custom title",

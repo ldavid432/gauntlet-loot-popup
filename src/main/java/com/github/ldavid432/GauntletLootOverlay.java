@@ -82,13 +82,13 @@ public class GauntletLootOverlay extends Overlay
 	}
 
 	@Nullable
-	private BufferedImage getChestImage(GauntletChestColor color)
+	private BufferedImage getChestImage(GauntletChestColor color, String lootSource)
 	{
 		BufferedImage image = chestImageCache[color.ordinal()];
 		if (image == null)
 		{
-			image = ImageUtil.loadImageResource(getClass(), color.getPath());
-			chestImageCache[color.ordinal()] = image;
+			image = ImageUtil.loadImageResource(getClass(), color.getPath(lootSource));
+			chestImageCache[color.getCacheInt(lootSource)] = image;
 		}
 		return image;
 	}
@@ -127,13 +127,13 @@ public class GauntletLootOverlay extends Overlay
 			overallBounds = rectangleFromImage(incX, incY, backgroundImage);
 			graphics.drawImage(backgroundImage, incX, incY, null);
 
-			BufferedImage chestImage = getChestImage(config.getChestSpriteColor());
+			BufferedImage chestImage = getChestImage(config.getChestSpriteColor(), plugin.getLoot().getSource());
 			if (chestImage != null)
 			{
 				graphics.drawImage(chestImage, incX + CHEST_OFFSET, incY + BACKGROUND_HEIGHT - CHEST_HEIGHT - CHEST_OFFSET, null);
 			}
 
-			renderTitle(graphics, incX, incY);
+			renderTitle(graphics, incX, incY, plugin.getLoot().getSource());
 
 			final BufferedImage closeButtonImage = getCloseButtonImage();
 			if (closeButtonImage != null)
@@ -142,14 +142,14 @@ public class GauntletLootOverlay extends Overlay
 			}
 		}
 
-		renderItems(graphics, plugin.getLootedItems(), startX, startY);
+		renderItems(graphics, plugin.getLoot().getItems(), startX, startY);
 
 		return null;
 	}
 
-	private void renderTitle(Graphics2D graphics, int incX, int incY)
+	private void renderTitle(Graphics2D graphics, int incX, int incY, String lootSource)
 	{
-		String title = config.getChestTitle().getText(config);
+		String title = config.getChestTitle2().getText(config, lootSource);
 		graphics.setFont(FontManager.getRunescapeBoldFont());
 
 		// Measure

@@ -1,16 +1,18 @@
 package com.github.ldavid432;
 
+import static com.github.ldavid432.GauntletLootUtil.CORRUPTED_HUNLLEF;
+import static com.github.ldavid432.GauntletLootUtil.HUNLLEF;
+import static com.github.ldavid432.GauntletLootUtil.LOOT_SOURCES;
 import static com.github.ldavid432.GauntletLootUtil.anyMenuEntry;
+import com.github.ldavid432.config.GauntletTitle;
+import com.github.ldavid432.config.GauntletTitle2;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Provides;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +23,7 @@ import net.runelite.api.GameState;
 import net.runelite.api.Menu;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
+import net.runelite.api.NPCComposition;
 import net.runelite.api.Point;
 import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.CommandExecuted;
@@ -29,6 +32,7 @@ import net.runelite.api.events.MenuShouldLeftClick;
 import net.runelite.api.gameval.ItemID;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ServerNpcLoot;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemStack;
 import net.runelite.client.input.MouseAdapter;
@@ -71,8 +75,7 @@ public class GauntletLootPlugin extends Plugin
 
 	@Getter
 	@Setter
-	@Nonnull
-	private List<ItemStack> lootedItems = Collections.emptyList();
+	private GauntletLoot loot = null;
 
 	@Override
 	protected void startUp() throws Exception
@@ -80,6 +83,17 @@ public class GauntletLootPlugin extends Plugin
 		overlayManager.add(overlay);
 		mouseManager.registerMouseListener(mouseListener);
 		client.getCanvas().addKeyListener(keyListener);
+
+		if (config.getChestTitleLegacy() != GauntletTitle.UNSET)
+		{
+			// Migrate if custom
+			if (config.getChestTitleLegacy() == GauntletTitle.CUSTOM)
+			{
+				config.setChestTitle2(GauntletTitle2.CUSTOM);
+			}
+
+			config.setChestTitleLegacy(GauntletTitle.UNSET);
+		}
 	}
 
 	@Override
@@ -92,12 +106,12 @@ public class GauntletLootPlugin extends Plugin
 
 	boolean isDisplayed()
 	{
-		return !lootedItems.isEmpty();
+		return loot != null;
 	}
 
 	private void clearLoot()
 	{
-		lootedItems = Collections.emptyList();
+		loot = null;
 	}
 
 	@Subscribe
@@ -108,23 +122,44 @@ public class GauntletLootPlugin extends Plugin
 		{
 			log.debug("Displaying Gauntlet loot preview");
 
-			onLootReceived(
-				new LootReceived(
-					"The Gauntlet",
-					-1,
-					null,
-					List.of(
-						new ItemStack(ItemID.NATURERUNE, 130),
-						new ItemStack(ItemID.PRIF_CRYSTAL_SHARD, 8),
-						new ItemStack(ItemID.RUNE_FULL_HELM + 1, 4),
-						new ItemStack(ItemID.RUNE_PICKAXE + 1, 3)
-					),
-					1
+			String source = HUNLLEF;
+			if (event.getArguments().length >= 1 && event.getArguments()[0].equalsIgnoreCase("corrupted"))
+			{
+				source = CORRUPTED_HUNLLEF;
+			}
+
+			loot = new GauntletLoot(
+				source,
+				ImmutableList.of(
+					new ItemStack(ItemID.NATURERUNE, 130),
+					new ItemStack(ItemID.PRIF_CRYSTAL_SHARD, 8),
+					new ItemStack(ItemID.RUNE_FULL_HELM + 1, 4),
+					new ItemStack(ItemID.RUNE_PICKAXE + 1, 3)
 				)
 			);
+
+			checkSound();
 		}
 	}
 
+	@Subscribe
+	public void onServerNpcLoot(ServerNpcLoot event)
+	{
+		if (event.getComposition() == null ||
+			event.getComposition().getName() == null ||
+			!LOOT_SOURCES.contains(event.getComposition().getName())
+		) {
+			return;
+		}
+
+		log.debug("Displaying Gauntlet popup for ServerNpcLoot. Source: {}", event.getComposition().getName());
+
+		loot = new GauntletLoot(event.getComposition().getName(), ImmutableList.copyOf(event.getItems()));
+
+		checkSound();
+	}
+
+	// TODO: Remove this after the 5/21/25 OSRS update - Only keeping this because currently the ServerNpcLoot can be turned off
 	@Subscribe
 	public void onLootReceived(LootReceived event)
 	{
@@ -133,11 +168,17 @@ public class GauntletLootPlugin extends Plugin
 			return;
 		}
 
-		log.debug("Displaying Gauntlet popup");
+		log.debug("Displaying Gauntlet popup for LootReceived");
 
-		lootedItems = ImmutableList.copyOf(event.getItems());
+		// Just default to HUNLLEF - this will hopefully be removed soon so not a big deal
+		loot = new GauntletLoot(HUNLLEF, ImmutableList.copyOf(event.getItems()));
 
-		if (lootedItems.stream().anyMatch(this::shouldPlayRareSound))
+		checkSound();
+	}
+
+	private void checkSound()
+	{
+		if (loot.getItems().stream().anyMatch(this::shouldPlayRareSound))
 		{
 			log.debug("Playing rare item sound for Gauntlet loot");
 			// Muspah rare item sound

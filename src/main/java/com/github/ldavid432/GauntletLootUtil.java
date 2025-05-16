@@ -1,8 +1,10 @@
 package com.github.ldavid432;
 
+import com.google.common.collect.ImmutableList;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Predicate;
 import net.runelite.api.Client;
 import net.runelite.api.MenuEntry;
@@ -25,4 +27,9 @@ public class GauntletLootUtil
 	static final int CHEST_WIDTH = 112;
 	static final int CHEST_HEIGHT = 126;
 	static final int CHEST_OFFSET = 7;
+
+	public static final String HUNLLEF = "Crystalline Hunllef";
+	public static final String CORRUPTED_HUNLLEF = "Corrupted Hunllef";
+	public static final List<String> LOOT_SOURCES = ImmutableList.of(CORRUPTED_HUNLLEF, HUNLLEF);
+
 }
