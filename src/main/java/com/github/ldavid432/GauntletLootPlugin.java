@@ -23,7 +23,6 @@ import net.runelite.api.GameState;
 import net.runelite.api.Menu;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
-import net.runelite.api.NPCComposition;
 import net.runelite.api.Point;
 import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.CommandExecuted;
@@ -49,7 +48,7 @@ import net.runelite.client.util.ColorUtil;
 @PluginDescriptor(
 	name = "Gauntlet Chest Popup",
 	description = "Barrows chest style UI for the gauntlet chest!",
-	tags = {"gauntlet", "loot", "chest", "sound"}
+	tags = {"gauntlet", "loot", "chest", "sound", "hunllef", "hunlef"}
 )
 public class GauntletLootPlugin extends Plugin
 {
@@ -148,7 +147,8 @@ public class GauntletLootPlugin extends Plugin
 		if (event.getComposition() == null ||
 			event.getComposition().getName() == null ||
 			!LOOT_SOURCES.contains(event.getComposition().getName())
-		) {
+		)
+		{
 			return;
 		}
 
