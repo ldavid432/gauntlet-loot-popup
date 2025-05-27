@@ -152,26 +152,9 @@ public class GauntletLootPlugin extends Plugin
 			return;
 		}
 
-		log.debug("Displaying Gauntlet popup for ServerNpcLoot. Source: {}", event.getComposition().getName());
+		log.debug("Displaying Gauntlet popup. Source: {}", event.getComposition().getName());
 
 		loot = new GauntletLoot(event.getComposition().getName(), ImmutableList.copyOf(event.getItems()));
-
-		checkSound();
-	}
-
-	// TODO: Remove this after the 5/21/25 OSRS update - Only keeping this because currently the ServerNpcLoot can be turned off
-	@Subscribe
-	public void onLootReceived(LootReceived event)
-	{
-		if (!Objects.equals(event.getName(), "The Gauntlet"))
-		{
-			return;
-		}
-
-		log.debug("Displaying Gauntlet popup for LootReceived");
-
-		// Just default to HUNLLEF - this will hopefully be removed soon so not a big deal
-		loot = new GauntletLoot(HUNLLEF, ImmutableList.copyOf(event.getItems()));
 
 		checkSound();
 	}
