@@ -106,24 +106,13 @@ public class GauntletLootOverlay extends Overlay
 		final int canvasWidth = client.getCanvasWidth();
 		final int canvasHeight = client.getCanvasHeight();
 
-		final int startX;
-		final int startY;
-
-		if (canvasWidth <= 1000 && canvasHeight <= 650)
-		{
-			startX = (canvasWidth - BACKGROUND_WIDTH) / 2;
-			startY = (canvasHeight - BACKGROUND_HEIGHT) / 2;
-		}
-		else
-		{
-			startX = canvasWidth / 2 - 24;
-			startY = canvasHeight / 3 - 24;
-		}
+		final int startX = (canvasWidth - BACKGROUND_WIDTH) / 2;
+		final int startY = (canvasHeight - BACKGROUND_HEIGHT) / 2;
 
 		if (backgroundImage != null)
 		{
-			int incX = startX - 110;
-			int incY = startY - 40;
+			int incX = startX - (BACKGROUND_WIDTH / 2);
+			int incY = startY - (BACKGROUND_HEIGHT / 2);
 			overallBounds = rectangleFromImage(incX, incY, backgroundImage);
 			graphics.drawImage(backgroundImage, incX, incY, null);
 
@@ -140,9 +129,9 @@ public class GauntletLootOverlay extends Overlay
 			{
 				renderCloseButton(graphics, closeButtonImage, incX, incY);
 			}
-		}
 
-		renderItems(graphics, plugin.getLoot().getItems(), startX, startY);
+			renderItems(graphics, plugin.getLoot().getItems(), startX - 5, startY - 60);
+		}
 
 		return null;
 	}
