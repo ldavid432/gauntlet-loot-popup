@@ -33,14 +33,3 @@ For a preview of the corrupted gauntlet do `::gauntletlootpreview corrupted`
 Example of customization:
 
 ![image](/readme_pic_2.png)
-
-
----
-
-#### Not seeing the popup?
-
-Make sure you have the `Loot Tracker` plugin on, and you are seeing loot from the Crystalline or Corrupted Hunllef.
-
-If not try this as per the official RuneLite discord:
-
-> Open either mobile, or the official client, and enable the in-game setting `Loot Tracker - Track loot`
