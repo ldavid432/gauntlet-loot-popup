@@ -25,6 +25,9 @@ For a preview of the corrupted gauntlet do `::gauntletlootpreview corrupted`
 
 - Can be closed with the close icon, by pressing ESC or by clicking outside the popup (if that setting is enabled).
 - From my testing this *Should* be included in screenshots taken by the `Screenshots` plugin.
+- The popup position is moveable
+  - Hold Alt (or whatever your Drag Hotkey is set to) and left-click drag to move
+  - Hold Alt and right-click the popup to reset the position to default
 
 ### Screenshots
 

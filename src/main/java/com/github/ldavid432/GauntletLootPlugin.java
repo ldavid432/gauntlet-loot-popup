@@ -4,10 +4,13 @@ import static com.github.ldavid432.GauntletLootUtil.CORRUPTED_HUNLLEF;
 import static com.github.ldavid432.GauntletLootUtil.HUNLLEF;
 import static com.github.ldavid432.GauntletLootUtil.LOOT_SOURCES;
 import static com.github.ldavid432.GauntletLootUtil.anyMenuEntry;
+import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import com.github.ldavid432.config.GauntletTitle;
 import com.github.ldavid432.config.GauntletTitle2;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Provides;
+import java.awt.Color;
+import java.awt.Point;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -23,12 +26,14 @@ import net.runelite.api.GameState;
 import net.runelite.api.Menu;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
-import net.runelite.api.Point;
 import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.CommandExecuted;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.MenuShouldLeftClick;
 import net.runelite.api.gameval.ItemID;
+import net.runelite.client.callback.ClientThread;
+import net.runelite.client.chat.ChatMessageManager;
+import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ServerNpcLoot;
@@ -39,7 +44,6 @@ import net.runelite.client.input.MouseListener;
 import net.runelite.client.input.MouseManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.loottracker.LootReceived;
 import net.runelite.client.ui.JagexColors;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ColorUtil;
@@ -58,6 +62,9 @@ public class GauntletLootPlugin extends Plugin
 	private Client client;
 
 	@Inject
+	private ClientThread clientThread;
+
+	@Inject
 	private MouseManager mouseManager;
 
 	@Inject
@@ -65,6 +72,9 @@ public class GauntletLootPlugin extends Plugin
 
 	@Inject
 	private OverlayManager overlayManager;
+
+	@Inject
+	private ChatMessageManager chatMessageManager;
 
 	@Inject
 	private GauntletLootOverlay overlay;
@@ -92,6 +102,21 @@ public class GauntletLootPlugin extends Plugin
 			}
 
 			config.setChestTitleLegacy(GauntletTitle.UNSET);
+		}
+
+		// Since last seen version wasn't in 1.0 checking for only it will trigger for everyone who installs the plugin.
+		//  By only triggering this during startup while not logged in we can "better" attempt to determine if this is a previous install or not.
+		//  Still not totally accurate but better than nothing.
+		if (config.getLastSeenVersion() < GauntletLootConfig.CURRENT_VERSION) {
+			if (client.getGameState() != GameState.LOGGED_IN) {
+				chatMessageManager.queue(
+					QueuedMessage.builder()
+						.type(ChatMessageType.CONSOLE)
+						.runeLiteFormattedMessage(ColorUtil.wrapWithColorTag("Gauntlet Chest Popup has been updated! The popup is now movable!", Color.RED))
+						.build()
+				);
+			}
+			config.setLastSeenVersion(GauntletLootConfig.CURRENT_VERSION);
 		}
 	}
 
@@ -236,8 +261,7 @@ public class GauntletLootPlugin extends Plugin
 	{
 		if (isDisplayed() && !client.isMenuOpen())
 		{
-			Point rlMousePos = client.getMouseCanvasPosition();
-			java.awt.Point mousePos = new java.awt.Point(rlMousePos.getX(), rlMousePos.getY());
+			Point mousePos = getMousePosition(client);
 
 			Integer itemId = overlay.getItemClicked(mousePos);
 			if (config.isExamineEnabled() && itemId != null)

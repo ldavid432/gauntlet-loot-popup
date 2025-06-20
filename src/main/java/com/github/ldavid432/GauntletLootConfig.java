@@ -12,6 +12,7 @@ import net.runelite.client.config.ConfigSection;
 public interface GauntletLootConfig extends Config
 {
 	String GROUP = "gauntletchestpopup";
+	int CURRENT_VERSION = 1;
 
 	@ConfigItem(
 		name = "Click outside to dismiss",
@@ -151,5 +152,24 @@ public interface GauntletLootConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigItem(
+		name = "",
+		description = "",
+		keyName = "lastSeenVersion",
+		hidden = true
+	)
+	default int getLastSeenVersion()
+	{
+		return -1;
+	}
+
+	@ConfigItem(
+		name = "",
+		description = "",
+		keyName = "lastSeenVersion",
+		hidden = true
+	)
+	void setLastSeenVersion(int version);
 
 }

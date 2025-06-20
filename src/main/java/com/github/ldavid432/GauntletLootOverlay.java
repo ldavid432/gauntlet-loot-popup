@@ -38,7 +38,6 @@ public class GauntletLootOverlay extends Overlay
 	private final BufferedImage backgroundImage;
 	private final BufferedImage[] chestImageCache = new BufferedImage[GauntletChestColor.values().length];
 
-	private Rectangle overallBounds;
 	private Rectangle closeButtonBounds;
 	private final Map<Integer, Rectangle> itemBounds = new HashMap<>();
 
@@ -55,6 +54,9 @@ public class GauntletLootOverlay extends Overlay
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
 		setPriority(200.0f);
+		setMovable(true);
+		// Start at the correct x and y so the overlay doesn't jump the first time it's opened
+		setBounds(getOverlayBounds(0, 0));
 
 		backgroundImage = ImageUtil.loadImageResource(getClass(), "background.png");
 	}
@@ -62,8 +64,7 @@ public class GauntletLootOverlay extends Overlay
 	@Nullable
 	private BufferedImage getCloseButtonImage()
 	{
-		net.runelite.api.Point rlMousePos = client.getMouseCanvasPosition();
-		if (closeButtonBounds != null && closeButtonBounds.contains(new Point(rlMousePos.getX(), rlMousePos.getY())))
+		if (isInCloseButtonBounds(getMousePosition(client)))
 		{
 			if (closeButtonHoveredImage == null)
 			{
@@ -93,7 +94,7 @@ public class GauntletLootOverlay extends Overlay
 		return image;
 	}
 
-	// Based on https://github.com/lalochazia/missed-clues
+	// Originally based on https://github.com/lalochazia/missed-clues
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
@@ -103,48 +104,40 @@ public class GauntletLootOverlay extends Overlay
 			return null;
 		}
 
-		final int canvasWidth = client.getCanvasWidth();
-		final int canvasHeight = client.getCanvasHeight();
-
-		final int startX = (canvasWidth - BACKGROUND_WIDTH) / 2;
-		final int startY = (canvasHeight - BACKGROUND_HEIGHT) / 2;
-
 		if (backgroundImage != null)
 		{
-			int incX = startX - (BACKGROUND_WIDTH / 2);
-			int incY = startY - (BACKGROUND_HEIGHT / 2);
-			overallBounds = rectangleFromImage(incX, incY, backgroundImage);
-			graphics.drawImage(backgroundImage, incX, incY, null);
+			setBounds(getOverlayBounds(BACKGROUND_WIDTH, BACKGROUND_HEIGHT));
+			graphics.drawImage(backgroundImage, 0, 0, null);
 
 			BufferedImage chestImage = getChestImage(config.getChestSpriteColor(), plugin.getLoot().getSource());
 			if (chestImage != null)
 			{
-				graphics.drawImage(chestImage, incX + CHEST_OFFSET, incY + BACKGROUND_HEIGHT - CHEST_HEIGHT - CHEST_OFFSET, null);
+				graphics.drawImage(chestImage, CHEST_OFFSET, BACKGROUND_HEIGHT - CHEST_HEIGHT - CHEST_OFFSET, null);
 			}
 
-			renderTitle(graphics, incX, incY, plugin.getLoot().getSource());
+			renderTitle(graphics, plugin.getLoot().getSource());
 
 			final BufferedImage closeButtonImage = getCloseButtonImage();
 			if (closeButtonImage != null)
 			{
-				renderCloseButton(graphics, closeButtonImage, incX, incY);
+				renderCloseButton(graphics, closeButtonImage);
 			}
 
-			renderItems(graphics, plugin.getLoot().getItems(), startX - 5, startY - 60);
+			renderItems(graphics, plugin.getLoot().getItems());
 		}
 
-		return null;
+		return getBounds().getSize();
 	}
 
-	private void renderTitle(Graphics2D graphics, int incX, int incY, String lootSource)
+	private void renderTitle(Graphics2D graphics, String lootSource)
 	{
 		String title = config.getChestTitle2().getText(config, lootSource);
 		graphics.setFont(FontManager.getRunescapeBoldFont());
 
 		// Measure
 		Rectangle titleBounds = graphics.getFontMetrics().getStringBounds(title, graphics).getBounds();
-		int titleX = incX + (backgroundImage.getWidth() / 2) - ((int) titleBounds.getWidth() / 2);
-		int titleY = incY + 25;
+		int titleX = (backgroundImage.getWidth() / 2) - ((int) titleBounds.getWidth() / 2);
+		int titleY = 25;
 
 		// Draw shadow
 		graphics.setColor(Color.BLACK);
@@ -152,13 +145,13 @@ public class GauntletLootOverlay extends Overlay
 
 		// Draw actual text
 		graphics.setColor(JagexColors.DARK_ORANGE_INTERFACE_TEXT);
-		graphics.drawString(title, incX + (backgroundImage.getWidth() / 2) - ((int) titleBounds.getWidth() / 2), incY + 25);
+		graphics.drawString(title, titleX, titleY);
 	}
 
-	private void renderCloseButton(Graphics2D graphics, BufferedImage closeButtonImage, int incX, int incY)
+	private void renderCloseButton(Graphics2D graphics, BufferedImage closeButtonImage)
 	{
-		int closeX = incX + backgroundImage.getWidth() - closeButtonImage.getWidth() - 8;
-		int closeY = incY + 7;
+		int closeX = backgroundImage.getWidth() - closeButtonImage.getWidth() - 8;
+		int closeY = 7;
 
 		closeButtonBounds = rectangleFromImage(
 			closeX,
@@ -169,8 +162,11 @@ public class GauntletLootOverlay extends Overlay
 		graphics.drawImage(closeButtonImage, closeX, closeY, null);
 	}
 
-	private void renderItems(Graphics2D graphics, List<ItemStack> items, int x, int y)
+	private void renderItems(Graphics2D graphics, List<ItemStack> items)
 	{
+		int x = 110;
+		int y = 40;
+
 		for (int i = 0; i < items.size(); i++)
 		{
 			ItemStack stack = items.get(i);
@@ -208,28 +204,33 @@ public class GauntletLootOverlay extends Overlay
 
 	private void resetBounds()
 	{
-		overallBounds = null;
+		setBounds(getOverlayBounds(0, 0));
 		closeButtonBounds = null;
 		itemBounds.clear();
 	}
 
 	public boolean isInBounds(Point point)
 	{
-		return overallBounds != null && overallBounds.contains(point);
+		return getBounds() != null && getBounds().contains(point);
 	}
 
 	public boolean isInCloseButtonBounds(Point point)
 	{
-		return closeButtonBounds != null && closeButtonBounds.contains(point);
+		return closeButtonBounds != null && getBounds() != null && getOffsetBounds(closeButtonBounds).contains(point);
 	}
 
 	public Integer getItemClicked(Point point)
 	{
 		AtomicReference<Integer> id = new AtomicReference<>();
 
+		if (getBounds() == null)
+		{
+			return null;
+		}
+
 		itemBounds.forEach(
-			(key, value) -> {
-				if (value.contains(point))
+			(key, bounds) -> {
+				if (getOffsetBounds(bounds).contains(point))
 				{
 					id.set(key);
 				}
@@ -237,5 +238,38 @@ public class GauntletLootOverlay extends Overlay
 		);
 
 		return id.get();
+	}
+
+	// Translate bounds from inside the overlay to their global position in the window/canvas
+	private Rectangle getOffsetBounds(Rectangle boundsInOverlay)
+	{
+		return new Rectangle(
+			boundsInOverlay.x + getBounds().x,
+			boundsInOverlay.y + getBounds().y,
+			boundsInOverlay.width,
+			boundsInOverlay.height
+		);
+	}
+
+	private Rectangle getOverlayBounds(int width, int height)
+	{
+		int x;
+		int y;
+
+		// Default positon is centered-ish
+		if (getPreferredLocation() == null)
+		{
+			// Technically `(client.getCanvasWidth() - BACKGROUND_WIDTH) / 2` is more correctly centered but
+			//  since the inventory is usually on the right we can do this to keep it more to the left
+			x = (client.getCanvasWidth() / 2) - BACKGROUND_WIDTH;
+			y = (client.getCanvasHeight() / 2) - BACKGROUND_HEIGHT;
+		}
+		else
+		{
+			x = getPreferredLocation().x;
+			y = getPreferredLocation().y;
+		}
+
+		return new Rectangle(x, y, width, height);
 	}
 }

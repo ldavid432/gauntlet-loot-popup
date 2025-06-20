@@ -1,6 +1,7 @@
 package com.github.ldavid432;
 
 import com.google.common.collect.ImmutableList;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
@@ -19,6 +20,12 @@ public class GauntletLootUtil
 	static boolean anyMenuEntry(Client client, Predicate<MenuEntry> predicate)
 	{
 		return Arrays.stream(client.getMenu().getMenuEntries()).anyMatch(predicate);
+	}
+
+	static Point getMousePosition(Client client)
+	{
+		net.runelite.api.Point rlMousePos = client.getMouseCanvasPosition();
+		return new Point(rlMousePos.getX(), rlMousePos.getY());
 	}
 
 	static final int BACKGROUND_WIDTH = 230;
