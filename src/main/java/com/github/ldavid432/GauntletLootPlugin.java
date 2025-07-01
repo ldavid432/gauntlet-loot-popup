@@ -348,6 +348,8 @@ public class GauntletLootPlugin extends Plugin
 				return config.shouldPlayArmourSeedSound();
 			case ItemID.PRIF_WEAPON_SEED_ENHANCED:
 				return config.shouldPlayEnhancedSeedSound();
+			case ItemID.GAUNTLETPET:
+				return config.shouldPlayPetSound();
 			default:
 				return false;
 		}
@@ -368,6 +370,8 @@ public class GauntletLootPlugin extends Plugin
 				return "A seed to be sung into the most powerful crystal weaponry.";
 			case ItemID.GAUNTLET_CRYSTALLINE_CAPE:
 				return "Earned by only the most accomplished warriors of Prifddinas.";
+			case ItemID.GAUNTLETPET:
+				return "Looks like a bit of a nightmare.";
 			default:
 				return itemName;
 		}

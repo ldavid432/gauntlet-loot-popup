@@ -154,6 +154,18 @@ public interface GauntletLootConfig extends Config
 	}
 
 	@ConfigItem(
+		name = "Youngllef",
+		description = "Play rare item sound for the Youngllef pet",
+		keyName = "playPetSound",
+		section = soundsSection,
+		position = 4
+	)
+	default boolean shouldPlayPetSound()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		name = "",
 		description = "",
 		keyName = "lastSeenVersion",
