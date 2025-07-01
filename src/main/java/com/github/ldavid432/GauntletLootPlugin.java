@@ -31,7 +31,6 @@ import net.runelite.api.events.CommandExecuted;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.MenuShouldLeftClick;
 import net.runelite.api.gameval.ItemID;
-import net.runelite.client.callback.ClientThread;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
@@ -60,9 +59,6 @@ public class GauntletLootPlugin extends Plugin
 
 	@Inject
 	private Client client;
-
-	@Inject
-	private ClientThread clientThread;
 
 	@Inject
 	private MouseManager mouseManager;
@@ -107,8 +103,10 @@ public class GauntletLootPlugin extends Plugin
 		// Since last seen version wasn't in 1.0 checking for only it will trigger for everyone who installs the plugin.
 		//  By only triggering this during startup while not logged in we can "better" attempt to determine if this is a previous install or not.
 		//  Still not totally accurate but better than nothing.
-		if (config.getLastSeenVersion() < GauntletLootConfig.CURRENT_VERSION) {
-			if (client.getGameState() != GameState.LOGGED_IN) {
+		if (config.getLastSeenVersion() < GauntletLootConfig.CURRENT_VERSION)
+		{
+			if (client.getGameState() != GameState.LOGGED_IN)
+			{
 				chatMessageManager.queue(
 					QueuedMessage.builder()
 						.type(ChatMessageType.CONSOLE)
@@ -270,7 +268,7 @@ public class GauntletLootPlugin extends Plugin
 
 				final Menu menu = client.getMenu();
 
-				MenuEntry examine = menu.createMenuEntry(0)
+				MenuEntry examine = menu.createMenuEntry(-1)
 					.setOption("Examine")
 					.setTarget(ColorUtil.wrapWithColorTag(itemName, JagexColors.MENU_TARGET))
 					.setType(MenuAction.RUNELITE)
@@ -283,7 +281,7 @@ public class GauntletLootPlugin extends Plugin
 						}
 					);
 
-				MenuEntry cancel = menu.createMenuEntry(1)
+				MenuEntry cancel = menu.createMenuEntry(-1)
 					.setOption("Cancel")
 					.setType(MenuAction.CANCEL);
 
@@ -293,12 +291,12 @@ public class GauntletLootPlugin extends Plugin
 			{
 				final Menu menu = client.getMenu();
 
-				MenuEntry close = menu.createMenuEntry(0)
+				MenuEntry close = menu.createMenuEntry(-1)
 					.setOption("Close")
 					.setType(MenuAction.RUNELITE)
 					.onClick(entry -> clearLoot());
 
-				MenuEntry cancel = menu.createMenuEntry(1)
+				MenuEntry cancel = menu.createMenuEntry(-1)
 					.setOption("Cancel")
 					.setType(MenuAction.CANCEL);
 
@@ -309,7 +307,7 @@ public class GauntletLootPlugin extends Plugin
 				// Prevent actions from behind the overlay from showing
 				final Menu menu = client.getMenu();
 
-				MenuEntry cancel = menu.createMenuEntry(1)
+				MenuEntry cancel = menu.createMenuEntry(-1)
 					.setOption("Cancel")
 					.setType(MenuAction.CANCEL);
 
