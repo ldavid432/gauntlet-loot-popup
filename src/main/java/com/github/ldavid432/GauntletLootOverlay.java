@@ -2,6 +2,7 @@ package com.github.ldavid432;
 
 import static com.github.ldavid432.GauntletLootUtil.*;
 import com.github.ldavid432.config.GauntletChestColor;
+import com.github.ldavid432.config.GauntletChestColor.ChestColor;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -36,7 +37,7 @@ public class GauntletLootOverlay extends Overlay
 	private BufferedImage closeButtonImage;
 	private BufferedImage closeButtonHoveredImage;
 	private final BufferedImage backgroundImage;
-	private final BufferedImage[] chestImageCache = new BufferedImage[GauntletChestColor.values().length];
+	private final BufferedImage[] chestImageCache = new BufferedImage[ChestColor.values().length];
 
 	private Rectangle closeButtonBounds;
 	private final Map<Integer, Rectangle> itemBounds = new HashMap<>();
@@ -83,13 +84,13 @@ public class GauntletLootOverlay extends Overlay
 	}
 
 	@Nullable
-	private BufferedImage getChestImage(GauntletChestColor color, String lootSource)
+	private BufferedImage getChestImage(ChestColor color)
 	{
 		BufferedImage image = chestImageCache[color.ordinal()];
 		if (image == null)
 		{
-			image = ImageUtil.loadImageResource(getClass(), color.getPath(lootSource));
-			chestImageCache[color.getCacheInt(lootSource)] = image;
+			image = ImageUtil.loadImageResource(getClass(), color.getPath());
+			chestImageCache[color.ordinal()] = image;
 		}
 		return image;
 	}
@@ -109,7 +110,7 @@ public class GauntletLootOverlay extends Overlay
 			setBounds(getOverlayBounds(BACKGROUND_WIDTH, BACKGROUND_HEIGHT));
 			graphics.drawImage(backgroundImage, 0, 0, null);
 
-			BufferedImage chestImage = getChestImage(config.getChestSpriteColor(), plugin.getLoot().getSource());
+			BufferedImage chestImage = getChestImage(plugin.getLoot().getColor());
 			if (chestImage != null)
 			{
 				graphics.drawImage(chestImage, CHEST_OFFSET, BACKGROUND_HEIGHT - CHEST_HEIGHT - CHEST_OFFSET, null);

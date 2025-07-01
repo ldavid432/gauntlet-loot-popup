@@ -35,6 +35,7 @@ import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.ServerNpcLoot;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemStack;
@@ -126,6 +127,17 @@ public class GauntletLootPlugin extends Plugin
 		overlayManager.remove(overlay);
 	}
 
+	@Subscribe
+	public void onConfigChanged(ConfigChanged configChanged)
+	{
+		if (Objects.equals(configChanged.getGroup(), GauntletLootConfig.GROUP))
+		{
+			if (isDisplayed() && Objects.equals(configChanged.getKey(), GauntletLootConfig.CHEST_COLOR)) {
+				loot.setColor(config.getChestSpriteColor().getTrueColor(loot.getSource()));
+			}
+		}
+	}
+
 	boolean isDisplayed()
 	{
 		return loot != null;
@@ -157,7 +169,8 @@ public class GauntletLootPlugin extends Plugin
 					new ItemStack(ItemID.PRIF_CRYSTAL_SHARD, 8),
 					new ItemStack(ItemID.RUNE_FULL_HELM + 1, 4),
 					new ItemStack(ItemID.RUNE_PICKAXE + 1, 3)
-				)
+				),
+				config.getChestSpriteColor().getTrueColor(source)
 			);
 
 			checkSound();
@@ -177,7 +190,12 @@ public class GauntletLootPlugin extends Plugin
 
 		log.debug("Displaying Gauntlet popup. Source: {}", event.getComposition().getName());
 
-		loot = new GauntletLoot(event.getComposition().getName(), ImmutableList.copyOf(event.getItems()));
+		String source = event.getComposition().getName();
+		loot = new GauntletLoot(
+			source,
+			ImmutableList.copyOf(event.getItems()),
+			config.getChestSpriteColor().getTrueColor(source)
+		);
 
 		checkSound();
 	}

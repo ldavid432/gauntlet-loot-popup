@@ -12,6 +12,7 @@ import net.runelite.client.config.ConfigSection;
 public interface GauntletLootConfig extends Config
 {
 	String GROUP = "gauntletchestpopup";
+	String CHEST_COLOR = "chestSpriteColor";
 	int CURRENT_VERSION = 1;
 
 	@ConfigItem(
@@ -46,8 +47,9 @@ public interface GauntletLootConfig extends Config
 	@ConfigItem(
 		name = "Chest Sprite Color",
 		description = "Select the color for the chest sprite on the UI (Does not recolor the physical chest object)<br>" +
-			"'Auto' selects either original or corrupted based on what you completed",
-		keyName = "chestSpriteColor",
+			"'Auto' selects either original or corrupted based on what you completed<br>" +
+			"'Random' selects a random solid color each time you open the chest",
+		keyName = CHEST_COLOR,
 		section = chestSection,
 		position = 0
 	)
