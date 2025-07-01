@@ -1,6 +1,4 @@
-# Gauntlet Chest Popup
-
-**NOTE: Currently, this plugin also requires the `Loot Tracker` plugin to be enabled!**
+# Gauntlet Chest Popup ![Install Count](https://img.shields.io/endpoint?url=https://api.runelite.net/pluginhub/shields/installs/plugin/gauntlet-chest-popup)
 
 - Displays a barrows chest style UI when you loot the Gauntlet chest!
 - Plays a sounds when you get a rare item
@@ -15,7 +13,7 @@
   - Hunllef: Automatically switches to Crystalline or Corrupted Hunllef depending on which one you completed
   - Custom: Uses custom title
 - Which items the rare item sound is played for
-  - Weapon seed, Armour seed and/or Enhanced seed
+  - Weapon seed, Armour seed, Youngllef (Pet) and/or Enhanced seed
 
 If you'd like to preview your customization you can run the command (type in chat) `::gauntletlootpreview`.
 This will bring up the popup with some fake loot.
