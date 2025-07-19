@@ -244,7 +244,7 @@ public class GauntletLootPlugin extends Plugin
 							log.debug("Gauntlet popup closed");
 							clearLoot();
 						}
-						else if (config.isExamineEnabled())
+						else
 						{
 							Integer itemId = overlay.getItemClicked(event.getPoint());
 							if (itemId != null)
@@ -280,7 +280,7 @@ public class GauntletLootPlugin extends Plugin
 			Point mousePos = getMousePosition(client);
 
 			Integer itemId = overlay.getItemClicked(mousePos);
-			if (config.isExamineEnabled() && itemId != null)
+			if (itemId != null)
 			{
 				final String itemName = itemManager.getItemComposition(itemId).getName();
 

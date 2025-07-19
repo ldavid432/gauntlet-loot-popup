@@ -26,17 +26,6 @@ public interface GauntletLootConfig extends Config
 		return true;
 	}
 
-	@ConfigItem(
-		name = "Examine items",
-		description = "Adds a menu option to examine loot items",
-		keyName = "examineItems",
-		position = 1
-	)
-	default boolean isExamineEnabled()
-	{
-		return true;
-	}
-
 	@ConfigSection(
 		name = "Chest theme",
 		description = "Configure the look of the chest loot UI",
