@@ -1,7 +1,11 @@
 package com.github.ldavid432;
 
-import static com.github.ldavid432.GauntletLootUtil.*;
-import com.github.ldavid432.config.GauntletChestColor;
+import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_HEIGHT;
+import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_WIDTH;
+import static com.github.ldavid432.GauntletLootUtil.CHEST_HEIGHT;
+import static com.github.ldavid432.GauntletLootUtil.CHEST_OFFSET;
+import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
+import static com.github.ldavid432.GauntletLootUtil.rectangleFromImage;
 import com.github.ldavid432.config.GauntletChestColor.ChestColor;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -116,7 +120,7 @@ public class GauntletLootOverlay extends Overlay
 				graphics.drawImage(chestImage, CHEST_OFFSET, BACKGROUND_HEIGHT - CHEST_HEIGHT - CHEST_OFFSET, null);
 			}
 
-			renderTitle(graphics, plugin.getLoot().getSource());
+			renderTitle(graphics);
 
 			final BufferedImage closeButtonImage = getCloseButtonImage();
 			if (closeButtonImage != null)
@@ -130,9 +134,9 @@ public class GauntletLootOverlay extends Overlay
 		return getBounds().getSize();
 	}
 
-	private void renderTitle(Graphics2D graphics, String lootSource)
+	private void renderTitle(Graphics2D graphics)
 	{
-		String title = config.getChestTitle2().getText(config, lootSource);
+		String title = plugin.getLoot().getTitle();
 		graphics.setFont(FontManager.getRunescapeBoldFont());
 
 		// Measure

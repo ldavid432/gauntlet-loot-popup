@@ -13,6 +13,7 @@ public interface GauntletLootConfig extends Config
 {
 	String GROUP = "gauntletchestpopup";
 	String CHEST_COLOR = "chestSpriteColor";
+	String CHEST_TITLE = "chestTitleText2";
 	int CURRENT_VERSION = 1;
 
 	@ConfigItem(
@@ -73,7 +74,7 @@ public interface GauntletLootConfig extends Config
 			"Gauntlet - Either 'The Gauntlet' or 'The Corrupted Gauntlet'<br>" +
 			"Hunllef - Either 'Crystalline Hunllef' or 'Corrupted Hunllef'<br>" +
 			"Custom - Title set in 'Custom title' below ",
-		keyName = "chestTitleText2",
+		keyName = CHEST_TITLE,
 		section = chestSection,
 		position = 1
 	)
@@ -85,7 +86,7 @@ public interface GauntletLootConfig extends Config
 	@ConfigItem(
 		name = "",
 		description = "",
-		keyName = "chestTitleText2"
+		keyName = CHEST_TITLE
 	)
 	void setChestTitle2(GauntletTitle2 title);
 

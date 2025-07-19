@@ -132,8 +132,16 @@ public class GauntletLootPlugin extends Plugin
 	{
 		if (Objects.equals(configChanged.getGroup(), GauntletLootConfig.GROUP))
 		{
-			if (isDisplayed() && Objects.equals(configChanged.getKey(), GauntletLootConfig.CHEST_COLOR)) {
-				loot.setColor(config.getChestSpriteColor().getTrueColor(loot.getSource()));
+			if (isDisplayed())
+			{
+				if (Objects.equals(configChanged.getKey(), GauntletLootConfig.CHEST_COLOR))
+				{
+					loot.updateColor(config);
+				}
+				else if (Objects.equals(configChanged.getKey(), GauntletLootConfig.CHEST_TITLE))
+				{
+					loot.updateTitle(config);
+				}
 			}
 		}
 	}
@@ -162,7 +170,7 @@ public class GauntletLootPlugin extends Plugin
 				source = CORRUPTED_HUNLLEF;
 			}
 
-			loot = new GauntletLoot(
+			loot = GauntletLoot.of(
 				source,
 				ImmutableList.of(
 					new ItemStack(ItemID.NATURERUNE, 130),
@@ -170,7 +178,7 @@ public class GauntletLootPlugin extends Plugin
 					new ItemStack(ItemID.RUNE_FULL_HELM + 1, 4),
 					new ItemStack(ItemID.RUNE_PICKAXE + 1, 3)
 				),
-				config.getChestSpriteColor().getTrueColor(source)
+				config
 			);
 
 			checkSound();
@@ -191,10 +199,10 @@ public class GauntletLootPlugin extends Plugin
 		log.debug("Displaying Gauntlet popup. Source: {}", event.getComposition().getName());
 
 		String source = event.getComposition().getName();
-		loot = new GauntletLoot(
+		loot = GauntletLoot.of(
 			source,
-			ImmutableList.copyOf(event.getItems()),
-			config.getChestSpriteColor().getTrueColor(source)
+			event.getItems(),
+			config
 		);
 
 		checkSound();
