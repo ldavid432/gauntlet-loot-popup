@@ -13,7 +13,7 @@
   - Hunllef: Automatically switches to Crystalline or Corrupted Hunllef depending on which one you completed
   - Custom: Uses custom title
 - Which items the rare item sound is played for
-  - Weapon seed, Armour seed, Youngllef (Pet) and/or Enhanced seed
+  - Weapon seed, Armour seed, Enhanced seed, Youngllef (Pet) and/or Elite scroll boxes
 
 If you'd like to preview your customization you can run the command (type in chat) `::gauntletlootpreview`.
 This will bring up the popup with some fake loot.
