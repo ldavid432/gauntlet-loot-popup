@@ -366,6 +366,8 @@ public class GauntletLootPlugin extends Plugin
 				return config.shouldPlayEnhancedSeedSound();
 			case ItemID.GAUNTLETPET:
 				return config.shouldPlayPetSound();
+			case ItemID.LEAGUE_CLUE_BOX_ELITE:
+				return config.shouldPlayEliteClueSound();
 			default:
 				return false;
 		}

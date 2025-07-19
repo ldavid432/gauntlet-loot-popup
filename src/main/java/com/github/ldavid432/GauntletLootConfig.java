@@ -144,6 +144,20 @@ public interface GauntletLootConfig extends Config
 		return true;
 	}
 
+	// Could make this handle elite clues AND scroll boxes but not worth the effort besides,
+	//  who the hell is in priff without X marks the spot?
+	@ConfigItem(
+		name = "Elite Scroll Box",
+		description = "Play rare item sound for Elite Clue Scroll boxes",
+		keyName = "playEliteClueSound",
+		section = soundsSection,
+		position = 3
+	)
+	default boolean shouldPlayEliteClueSound()
+	{
+		return false;
+	}
+
 	@ConfigItem(
 		name = "Youngllef",
 		description = "Play rare item sound for the Youngllef pet",
