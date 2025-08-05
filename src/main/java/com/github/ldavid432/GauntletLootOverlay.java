@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import net.runelite.api.Client;
+import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemStack;
 import net.runelite.client.game.SpriteManager;
@@ -36,7 +37,6 @@ public class GauntletLootOverlay extends Overlay
 	private final Client client;
 	private final ItemManager itemManager;
 	private final SpriteManager spriteManager;
-	private final GauntletLootConfig config;
 
 	private BufferedImage closeButtonImage;
 	private BufferedImage closeButtonHoveredImage;
@@ -47,14 +47,13 @@ public class GauntletLootOverlay extends Overlay
 	private final Map<Integer, Rectangle> itemBounds = new HashMap<>();
 
 	@Inject
-	public GauntletLootOverlay(GauntletLootPlugin plugin, Client client, ItemManager itemManager, SpriteManager spriteManager, GauntletLootConfig config)
+	public GauntletLootOverlay(GauntletLootPlugin plugin, Client client, ItemManager itemManager, SpriteManager spriteManager)
 	{
 		super(plugin);
 		this.plugin = plugin;
 		this.client = client;
 		this.itemManager = itemManager;
 		this.spriteManager = spriteManager;
-		this.config = config;
 
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
@@ -73,7 +72,8 @@ public class GauntletLootOverlay extends Overlay
 		{
 			if (closeButtonHoveredImage == null)
 			{
-				closeButtonHoveredImage = spriteManager.getSprite(1732, 0);
+
+				closeButtonHoveredImage = spriteManager.getSprite(SpriteID.SteelborderCloseButton._1, 0);
 			}
 			return closeButtonHoveredImage;
 		}
@@ -81,7 +81,7 @@ public class GauntletLootOverlay extends Overlay
 		{
 			if (closeButtonImage == null)
 			{
-				closeButtonImage = spriteManager.getSprite(1731, 0);
+				closeButtonImage = spriteManager.getSprite(SpriteID.SteelborderCloseButton._0, 0);
 			}
 			return closeButtonImage;
 		}

@@ -196,14 +196,11 @@ public class GauntletLootPlugin extends Plugin
 			return;
 		}
 
-		log.debug("Displaying Gauntlet popup. Source: {}", event.getComposition().getName());
-
 		String source = event.getComposition().getName();
-		loot = GauntletLoot.of(
-			source,
-			event.getItems(),
-			config
-		);
+
+		log.debug("Displaying Gauntlet popup. Source: {}", source);
+
+		loot = GauntletLoot.of(source, event.getItems(), config);
 
 		checkSound();
 	}
