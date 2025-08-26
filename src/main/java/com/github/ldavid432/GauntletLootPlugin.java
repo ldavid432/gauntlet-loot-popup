@@ -17,6 +17,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.Objects;
 import javax.inject.Inject;
+import javax.swing.SwingUtilities;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -238,7 +239,7 @@ public class GauntletLootPlugin extends Plugin
 		@Override
 		public MouseEvent mousePressed(MouseEvent event)
 		{
-			if (isDisplayed() && event.getButton() == 1)
+			if (isDisplayed() && SwingUtilities.isLeftMouseButton(event))
 			{
 				if (overlay.isInBounds(event.getPoint()))
 				{
