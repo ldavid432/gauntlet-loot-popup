@@ -11,25 +11,18 @@ public enum GauntletTitle2
 	CUSTOM;
 
 	@Nonnull
-	public String getText(GauntletLootConfig config, String source)
+	public String getText(GauntletLootConfig config, String hunllefText, String gauntletText)
 	{
 		switch (this)
 		{
 			case GAUNTLET:
-				if (source.equals(GauntletLootUtil.CORRUPTED_HUNLLEF))
-				{
-					return "The Corrupted Gauntlet";
-				}
-				else
-				{
-					return "The Gauntlet";
-				}
+				return gauntletText;
 			case CUSTOM:
 				return config.getChestCustomTitle();
 			case HUNLLEF:
 				// Fall-through
 			default:
-				return source;
+				return hunllefText;
 		}
 	}
 }

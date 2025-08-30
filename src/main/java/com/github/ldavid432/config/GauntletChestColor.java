@@ -1,64 +1,43 @@
 package com.github.ldavid432.config;
 
-import static com.github.ldavid432.GauntletLootUtil.CORRUPTED_HUNLLEF;
-import java.util.Objects;
 import java.util.Random;
-import java.util.function.Function;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
-@AllArgsConstructor
 public enum GauntletChestColor
 {
-	ORIGINAL(ChestColor.ORIGINAL),
-	CORRUPTED(ChestColor.CORRUPTED),
-	BLUE(ChestColor.BLUE),
-	GREEN(ChestColor.GREEN),
-	PURPLE(ChestColor.PURPLE),
-	WHITE(ChestColor.WHITE),
-	YELLOW(ChestColor.YELLOW),
-	AUTO(source -> {
-		if (Objects.equals(source, CORRUPTED_HUNLLEF))
+	ORIGINAL,
+	CORRUPTED,
+	BLUE,
+	GREEN,
+	PURPLE,
+	WHITE,
+	YELLOW,
+	AUTO {
+		@Override
+		protected String getPathPart(GauntletChestColor autoColor)
 		{
-			return ChestColor.CORRUPTED;
+			// autoColor should never be AUTO, but just in case to prevent recursion
+			return autoColor != AUTO ? autoColor.getPathPart(autoColor) : ORIGINAL.getPathPart(autoColor);
 		}
-		else
+	},
+	RANDOM {
+		@Override
+		public String getPathPart(GauntletChestColor autoColor)
 		{
-			return ChestColor.ORIGINAL;
+			// should never return AUTO so the autoColor doesn't actually matter here
+			return values()[random.nextInt(values().length - 2)].getPathPart(ORIGINAL);
 		}
-	}),
-	RANDOM(s -> ChestColor.random());
+	};
 
-	private final Function<String, ChestColor> getTrueColor;
+	private static final Random random = new Random();
 
-	GauntletChestColor(ChestColor color) {
-		this.getTrueColor = s -> color;
-	}
-
-	public enum ChestColor {
-		// Light Blue
-		ORIGINAL,
-		// Red
-		CORRUPTED,
-		BLUE,
-		GREEN,
-		PURPLE,
-		WHITE,
-		YELLOW;
-
-		@Getter
-		private final String path = "chest_" + name().toLowerCase() + ".png";
-
-		private static final Random random = new Random();
-
-		public static ChestColor random() {
-			return values()[random.nextInt(values().length)];
-		}
-	}
-
-	public ChestColor getTrueColor(String source)
+	protected String getPathPart(GauntletChestColor autoColor)
 	{
-		return getTrueColor.apply(source);
+		return name().toLowerCase();
+	}
+
+	public String getPath(GauntletChestColor autoColor)
+	{
+		return "chest_" + getPathPart(autoColor) + ".png";
 	}
 
 }

@@ -6,16 +6,17 @@ import static com.github.ldavid432.GauntletLootUtil.CHEST_HEIGHT;
 import static com.github.ldavid432.GauntletLootUtil.CHEST_OFFSET;
 import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import static com.github.ldavid432.GauntletLootUtil.rectangleFromImage;
-import com.github.ldavid432.config.GauntletChestColor.ChestColor;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -30,6 +31,7 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.util.ImageUtil;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class GauntletLootOverlay extends Overlay
 {
@@ -41,7 +43,7 @@ public class GauntletLootOverlay extends Overlay
 	private BufferedImage closeButtonImage;
 	private BufferedImage closeButtonHoveredImage;
 	private final BufferedImage backgroundImage;
-	private final BufferedImage[] chestImageCache = new BufferedImage[ChestColor.values().length];
+	private final ArrayList<Pair<String, BufferedImage>> imageCache = new ArrayList<>();
 
 	private Rectangle closeButtonBounds;
 	private final Map<Integer, Rectangle> itemBounds = new HashMap<>();
@@ -88,13 +90,25 @@ public class GauntletLootOverlay extends Overlay
 	}
 
 	@Nullable
-	private BufferedImage getChestImage(ChestColor color)
+	private BufferedImage getImage(String imagePath)
 	{
-		BufferedImage image = chestImageCache[color.ordinal()];
+		BufferedImage image = imageCache.stream()
+			.filter(pair -> Objects.equals(pair.getKey(), imagePath))
+			.findFirst()
+			.map(Pair::getValue)
+			.orElse(null);
+
 		if (image == null)
 		{
-			image = ImageUtil.loadImageResource(getClass(), color.getPath());
-			chestImageCache[color.ordinal()] = image;
+			image = ImageUtil.loadImageResource(getClass(), imagePath);
+			if (image != null)
+			{
+				imageCache.add(Pair.of(imagePath, image));
+				if (imageCache.size() > 10)
+				{
+					imageCache.remove(0);
+				}
+			}
 		}
 		return image;
 	}
@@ -114,7 +128,7 @@ public class GauntletLootOverlay extends Overlay
 			setBounds(getOverlayBounds(BACKGROUND_WIDTH, BACKGROUND_HEIGHT));
 			graphics.drawImage(backgroundImage, 0, 0, null);
 
-			BufferedImage chestImage = getChestImage(plugin.getLoot().getColor());
+			BufferedImage chestImage = getImage(plugin.getLoot().getImagePath());
 			if (chestImage != null)
 			{
 				graphics.drawImage(chestImage, CHEST_OFFSET, BACKGROUND_HEIGHT - CHEST_HEIGHT - CHEST_OFFSET, null);

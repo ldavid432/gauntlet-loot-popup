@@ -1,12 +1,12 @@
 package com.github.ldavid432;
 
-import static com.github.ldavid432.GauntletLootUtil.CORRUPTED_HUNLLEF;
-import static com.github.ldavid432.GauntletLootUtil.HUNLLEF;
-import static com.github.ldavid432.GauntletLootUtil.LOOT_SOURCES;
 import static com.github.ldavid432.GauntletLootUtil.anyMenuEntry;
 import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import com.github.ldavid432.config.GauntletTitle;
 import com.github.ldavid432.config.GauntletTitle2;
+import com.github.ldavid432.loot.Loot;
+import com.github.ldavid432.loot.LootItem;
+import com.github.ldavid432.loot.LootSource;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Provides;
 import java.awt.Color;
@@ -15,7 +15,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import lombok.Getter;
@@ -82,7 +84,7 @@ public class GauntletLootPlugin extends Plugin
 
 	@Getter
 	@Setter
-	private GauntletLoot loot = null;
+	private Loot loot = null;
 
 	@Override
 	protected void startUp() throws Exception
@@ -165,13 +167,13 @@ public class GauntletLootPlugin extends Plugin
 		{
 			log.debug("Displaying Gauntlet loot preview");
 
-			String source = HUNLLEF;
+			LootSource source = LootSource.GAUNTLET;
 			if (event.getArguments().length >= 1 && event.getArguments()[0].equalsIgnoreCase("corrupted"))
 			{
-				source = CORRUPTED_HUNLLEF;
+				source = LootSource.CORRUPTED_GAUNTLET;
 			}
 
-			loot = GauntletLoot.of(
+			loot = Loot.of(
 				source,
 				ImmutableList.of(
 					new ItemStack(ItemID.NATURERUNE, 130),
@@ -190,20 +192,22 @@ public class GauntletLootPlugin extends Plugin
 	public void onServerNpcLoot(ServerNpcLoot event)
 	{
 		if (event.getComposition() == null ||
-			event.getComposition().getName() == null ||
-			!LOOT_SOURCES.contains(event.getComposition().getName())
+			event.getComposition().getName() == null
 		)
 		{
 			return;
 		}
 
-		String source = event.getComposition().getName();
+		Arrays.stream(LootSource.values())
+			.filter(source -> source.getSourceName().equals(event.getComposition().getName()))
+			.findFirst()
+			.ifPresent(source -> {
+				log.debug("Displaying Gauntlet popup. Source: {}", source.getSourceName());
 
-		log.debug("Displaying Gauntlet popup. Source: {}", source);
+				loot = Loot.of(source, event.getItems(), config);
 
-		loot = GauntletLoot.of(source, event.getItems(), config);
-
-		checkSound();
+				checkSound();
+			});
 	}
 
 	private void checkSound()
@@ -362,42 +366,21 @@ public class GauntletLootPlugin extends Plugin
 
 	private boolean shouldPlayRareSound(ItemStack stack)
 	{
-		switch (stack.getId())
-		{
-			case ItemID.CRYSTAL_SEED_OLD:
-				return config.shouldPlayWeaponSeedSound();
-			case ItemID.PRIF_ARMOUR_SEED:
-				return config.shouldPlayArmourSeedSound();
-			case ItemID.PRIF_WEAPON_SEED_ENHANCED:
-				return config.shouldPlayEnhancedSeedSound();
-			case ItemID.GAUNTLETPET:
-				return config.shouldPlayPetSound();
-			case ItemID.LEAGUE_CLUE_BOX_ELITE:
-				return config.shouldPlayEliteClueSound();
-			default:
-				return false;
-		}
+		return Arrays.stream(LootItem.values())
+			.filter(item -> item.getItemId() == stack.getId())
+			.findFirst()
+			.map(value -> value.shouldPlaySound(config))
+			.orElse(false);
 	}
 
-	// For the few notable items return their actual examine text, otherwise just return the item name
+	// TODO: Maybe enhance to mention quantity of non-important items
+	// For important loot return their actual examine text, otherwise just return the item name
 	private String getExamineText(int itemId, String itemName)
 	{
-		switch (itemId)
-		{
-			case ItemID.PRIF_CRYSTAL_SHARD:
-				return "A shard of the finest crystal, from the crystal city itself.";
-			case ItemID.CRYSTAL_SEED_OLD:
-				return "A seed to be sung into the finest crystal weapons.";
-			case ItemID.PRIF_ARMOUR_SEED:
-				return "A seed to be sung into the finest crystal armour.";
-			case ItemID.PRIF_WEAPON_SEED_ENHANCED:
-				return "A seed to be sung into the most powerful crystal weaponry.";
-			case ItemID.GAUNTLET_CRYSTALLINE_CAPE:
-				return "Earned by only the most accomplished warriors of Prifddinas.";
-			case ItemID.GAUNTLETPET:
-				return "Looks like a bit of a nightmare.";
-			default:
-				return itemName;
-		}
+		return Arrays.stream(LootItem.values())
+			.filter(item -> item.getItemId() == itemId)
+			.findFirst()
+			.map(LootItem::getExamineText)
+			.orElse(itemName);
 	}
 }
