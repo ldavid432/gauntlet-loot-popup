@@ -74,7 +74,6 @@ public class GauntletLootOverlay extends Overlay
 		{
 			if (closeButtonHoveredImage == null)
 			{
-
 				closeButtonHoveredImage = spriteManager.getSprite(SpriteID.SteelborderCloseButton._1, 0);
 			}
 			return closeButtonHoveredImage;

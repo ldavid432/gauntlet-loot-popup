@@ -28,15 +28,14 @@ public class GauntletLootUtil
 		return new Point(rlMousePos.getX(), rlMousePos.getY());
 	}
 
-	static final int BACKGROUND_WIDTH = 230;
-	static final int BACKGROUND_HEIGHT = 200;
+	public static final int BACKGROUND_WIDTH = 230;
+	public static final int BACKGROUND_HEIGHT = 200;
 
-	static final int CHEST_WIDTH = 112;
-	static final int CHEST_HEIGHT = 126;
-	static final int CHEST_OFFSET = 7;
+	public static final int CHEST_WIDTH = 112;
+	public static final int CHEST_HEIGHT = 126;
+	public static final int CHEST_OFFSET = 7;
 
 	public static final String HUNLLEF = "Crystalline Hunllef";
 	public static final String CORRUPTED_HUNLLEF = "Corrupted Hunllef";
-	public static final List<String> LOOT_SOURCES = ImmutableList.of(CORRUPTED_HUNLLEF, HUNLLEF);
 
 }

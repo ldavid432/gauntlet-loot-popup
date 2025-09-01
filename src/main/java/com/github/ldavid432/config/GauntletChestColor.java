@@ -21,7 +21,7 @@ public enum GauntletChestColor
 	},
 	RANDOM {
 		@Override
-		public String getPathPart(GauntletChestColor autoColor)
+		protected String getPathPart(GauntletChestColor autoColor)
 		{
 			// should never return AUTO so the autoColor doesn't actually matter here
 			return values()[random.nextInt(values().length - 2)].getPathPart(ORIGINAL);

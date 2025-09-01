@@ -15,7 +15,7 @@ import net.runelite.client.game.ItemStack;
  * Image and title are decided upon loot being received in order to support things like random images
  */
 @Data
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class Loot
 {
 	@Nonnull
