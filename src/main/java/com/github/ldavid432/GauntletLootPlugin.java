@@ -17,7 +17,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.Optional;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import lombok.Getter;
@@ -139,7 +138,7 @@ public class GauntletLootPlugin extends Plugin
 			{
 				if (Objects.equals(configChanged.getKey(), GauntletLootConfig.CHEST_COLOR))
 				{
-					loot.updateColor(config);
+					loot.updateImage(config);
 				}
 				else if (Objects.equals(configChanged.getKey(), GauntletLootConfig.CHEST_TITLE))
 				{

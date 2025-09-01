@@ -2,10 +2,9 @@ package com.github.ldavid432;
 
 import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_HEIGHT;
 import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_WIDTH;
-import static com.github.ldavid432.GauntletLootUtil.CHEST_HEIGHT;
-import static com.github.ldavid432.GauntletLootUtil.CHEST_OFFSET;
 import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import static com.github.ldavid432.GauntletLootUtil.rectangleFromImage;
+import com.github.ldavid432.loot.LootImage;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -127,10 +126,11 @@ public class GauntletLootOverlay extends Overlay
 			setBounds(getOverlayBounds(BACKGROUND_WIDTH, BACKGROUND_HEIGHT));
 			graphics.drawImage(backgroundImage, 0, 0, null);
 
-			BufferedImage chestImage = getImage(plugin.getLoot().getImagePath());
-			if (chestImage != null)
+			LootImage lootImage = plugin.getLoot().getImage();
+			BufferedImage image = getImage(lootImage.getPath());
+			if (image != null)
 			{
-				graphics.drawImage(chestImage, CHEST_OFFSET, BACKGROUND_HEIGHT - CHEST_HEIGHT - CHEST_OFFSET, null);
+				lootImage.renderImage(graphics, image);
 			}
 
 			renderTitle(graphics);

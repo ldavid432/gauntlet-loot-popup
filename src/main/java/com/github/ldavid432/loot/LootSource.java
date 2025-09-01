@@ -1,6 +1,9 @@
 package com.github.ldavid432.loot;
 
 import com.github.ldavid432.GauntletLootConfig;
+import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_HEIGHT;
+import static com.github.ldavid432.GauntletLootUtil.CHEST_HEIGHT;
+import static com.github.ldavid432.GauntletLootUtil.CHEST_OFFSET;
 import static com.github.ldavid432.GauntletLootUtil.CORRUPTED_HUNLLEF;
 import static com.github.ldavid432.GauntletLootUtil.HUNLLEF;
 import com.github.ldavid432.config.GauntletChestColor;
@@ -17,22 +20,23 @@ public enum LootSource
 	GAUNTLET(
 		HUNLLEF,
 		config -> config.getChestTitle2().getText(config, HUNLLEF, "The Gauntlet"),
-		config -> config.getChestSpriteColor().getPath(GauntletChestColor.ORIGINAL)
+		config -> new LootImage(config.getChestSpriteColor().getPath(GauntletChestColor.ORIGINAL), CHEST_OFFSET, BACKGROUND_HEIGHT - CHEST_HEIGHT - CHEST_OFFSET)
 	),
 	CORRUPTED_GAUNTLET(
 		CORRUPTED_HUNLLEF,
 		config -> config.getChestTitle2().getText(config, CORRUPTED_HUNLLEF, "The Corrupted Gauntlet"),
-		config -> config.getChestSpriteColor().getPath(GauntletChestColor.CORRUPTED)
+		config -> new LootImage(config.getChestSpriteColor().getPath(GauntletChestColor.CORRUPTED), CHEST_OFFSET, BACKGROUND_HEIGHT - CHEST_HEIGHT - CHEST_OFFSET)
 	);
 
 	@Getter
 	private final String sourceName;
 	private final Function<GauntletLootConfig, String> getTitle;
-	private final Function<GauntletLootConfig, String> getImagePath;
+	@Getter
+	private final Function<GauntletLootConfig, LootImage> getImage;
 
-	LootSource(String name, String imagePath)
+	LootSource(String name, LootImage image)
 	{
-		this(name, c -> name, c -> imagePath);
+		this(name, c -> name, c -> image);
 	}
 
 	public String getTitle(GauntletLootConfig config)
@@ -40,8 +44,8 @@ public enum LootSource
 		return getTitle.apply(config);
 	}
 
-	public String getImagePath(GauntletLootConfig config)
+	public LootImage getImage(GauntletLootConfig config)
 	{
-		return getImagePath.apply(config);
+		return getImage.apply(config);
 	}
 }

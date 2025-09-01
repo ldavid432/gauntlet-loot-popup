@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nonnull;
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import net.runelite.client.game.ItemStack;
@@ -24,13 +25,13 @@ public class Loot
 	private final List<ItemStack> items;
 
 	@Nonnull
-	private String imagePath;
+	private LootImage image;
 	@Nonnull
 	private String title;
 
-	public void updateColor(GauntletLootConfig config)
+	public void updateImage(GauntletLootConfig config)
 	{
-		setImagePath(source.getImagePath(config));
+		setImage(source.getImage(config));
 	}
 
 	public void updateTitle(GauntletLootConfig config)
@@ -43,7 +44,7 @@ public class Loot
 		return new Loot(
 			source,
 			ImmutableList.copyOf(items),
-			source.getImagePath(config),
+			source.getImage(config),
 			source.getTitle(config)
 		);
 	}
