@@ -5,6 +5,7 @@ import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_WIDTH;
 import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import static com.github.ldavid432.GauntletLootUtil.rectangleFromImage;
 import com.github.ldavid432.loot.LootImage;
+import com.github.ldavid432.loot.LootItem;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -22,7 +23,6 @@ import javax.inject.Inject;
 import net.runelite.api.Client;
 import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.game.ItemStack;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.JagexColors;
@@ -180,16 +180,16 @@ public class GauntletLootOverlay extends Overlay
 		graphics.drawImage(closeButtonImage, closeX, closeY, null);
 	}
 
-	private void renderItems(Graphics2D graphics, List<ItemStack> items)
+	private void renderItems(Graphics2D graphics, List<LootItem> items)
 	{
 		int x = 110;
 		int y = 40;
 
 		for (int i = 0; i < items.size(); i++)
 		{
-			ItemStack stack = items.get(i);
-			int itemId = stack.getId();
-			int quantity = stack.getQuantity();
+			LootItem item = items.get(i);
+			int itemId = item.getId();
+			int quantity = item.getQuantity();
 
 			BufferedImage itemImage;
 			if (quantity > 1)

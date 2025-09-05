@@ -1,6 +1,6 @@
 package com.github.ldavid432;
 
-import com.google.common.collect.ImmutableList;
+import com.github.ldavid432.loot.Item;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -37,5 +37,14 @@ public class GauntletLootUtil
 
 	public static final String HUNLLEF = "Crystalline Hunllef";
 	public static final String CORRUPTED_HUNLLEF = "Corrupted Hunllef";
+	public static final List<Item> GAUNTLET_ITEMS = List.of(
+		Item.CRYSTAL_WEAPON_SEED,
+		Item.CRYSTAL_ARMOUR_SEED,
+		Item.ENHANCED_WEAPON_SEED,
+		Item.YOUNGLLEF,
+		Item.ELITE_SCROLL_BOX,
+		Item.GAUNTLET_CAPE,
+		Item.CRYSTAL_SHARD
+	);
 
 }

@@ -5,7 +5,6 @@ import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import com.github.ldavid432.config.GauntletTitle;
 import com.github.ldavid432.config.GauntletTitle2;
 import com.github.ldavid432.loot.Loot;
-import com.github.ldavid432.loot.LootItem;
 import com.github.ldavid432.loot.LootSource;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Provides;
@@ -16,6 +15,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
@@ -46,6 +46,7 @@ import net.runelite.client.input.MouseListener;
 import net.runelite.client.input.MouseManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.loottracker.LootReceived;
 import net.runelite.client.ui.JagexColors;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ColorUtil;
@@ -172,18 +173,15 @@ public class GauntletLootPlugin extends Plugin
 				source = LootSource.CORRUPTED_GAUNTLET;
 			}
 
-			loot = Loot.of(
-				source,
+			processLoot(
+				source.getSourceName(),
 				ImmutableList.of(
 					new ItemStack(ItemID.NATURERUNE, 130),
 					new ItemStack(ItemID.PRIF_CRYSTAL_SHARD, 8),
 					new ItemStack(ItemID.RUNE_FULL_HELM + 1, 4),
 					new ItemStack(ItemID.RUNE_PICKAXE + 1, 3)
-				),
-				config
+				)
 			);
-
-			checkSound();
 		}
 	}
 
@@ -197,26 +195,34 @@ public class GauntletLootPlugin extends Plugin
 			return;
 		}
 
+		processLoot(event.getComposition().getName(), event.getItems());
+	}
+
+	@Subscribe
+	public void onLootReceived(LootReceived event)
+	{
+		if (event.getName() == null)
+		{
+			return;
+		}
+
+		processLoot(event.getName(), event.getItems());
+	}
+
+	private void processLoot(String sourceName, Collection<ItemStack> lootItems)
+	{
 		Arrays.stream(LootSource.values())
-			.filter(source -> source.getSourceName().equals(event.getComposition().getName()))
+			.filter(source -> source.getSourceName().equals(sourceName))
 			.findFirst()
 			.ifPresent(source -> {
 				log.debug("Displaying Gauntlet popup. Source: {}", source.getSourceName());
 
-				loot = Loot.of(source, event.getItems(), config);
-
-				checkSound();
+				loot = Loot.of(source, lootItems, config, () -> {
+					log.debug("Playing rare item sound for Gauntlet loot");
+					// Muspah rare item sound
+					client.playSoundEffect(6765);
+				});
 			});
-	}
-
-	private void checkSound()
-	{
-		if (loot.getItems().stream().anyMatch(this::shouldPlayRareSound))
-		{
-			log.debug("Playing rare item sound for Gauntlet loot");
-			// Muspah rare item sound
-			client.playSoundEffect(6765);
-		}
 	}
 
 	@Provides
@@ -304,7 +310,7 @@ public class GauntletLootPlugin extends Plugin
 					.onClick(
 						entry -> {
 							log.debug("Examining Gauntlet popup item");
-							client.addChatMessage(ChatMessageType.ITEM_EXAMINE, "", getExamineText(entry.getItemId(), itemName), "");
+							client.addChatMessage(ChatMessageType.ITEM_EXAMINE, "", loot.getExamineText(entry.getItemId(), itemName), "");
 						}
 					);
 
@@ -346,7 +352,7 @@ public class GauntletLootPlugin extends Plugin
 	@Subscribe
 	public void onMenuShouldLeftClick(MenuShouldLeftClick event)
 	{
-		// Make the menu open on a left click when over on an item
+		// Make the menu open on a left click when over an item
 		if (anyMenuEntry(client, entry -> entry.getIdentifier() == MENU_EXAMINE_ID))
 		{
 			event.setForceRightClick(true);
@@ -363,23 +369,4 @@ public class GauntletLootPlugin extends Plugin
 		}
 	}
 
-	private boolean shouldPlayRareSound(ItemStack stack)
-	{
-		return Arrays.stream(LootItem.values())
-			.filter(item -> item.getItemId() == stack.getId())
-			.findFirst()
-			.map(value -> value.shouldPlaySound(config))
-			.orElse(false);
-	}
-
-	// TODO: Maybe enhance to mention quantity of non-important items
-	// For important loot return their actual examine text, otherwise just return the item name
-	private String getExamineText(int itemId, String itemName)
-	{
-		return Arrays.stream(LootItem.values())
-			.filter(item -> item.getItemId() == itemId)
-			.findFirst()
-			.map(LootItem::getExamineText)
-			.orElse(itemName);
-	}
 }
