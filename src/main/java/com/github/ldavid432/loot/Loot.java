@@ -1,12 +1,14 @@
 package com.github.ldavid432.loot;
 
 import com.github.ldavid432.GauntletLootConfig;
-import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.AccessLevel;
-import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.runelite.client.game.ItemStack;
 
@@ -15,35 +17,57 @@ import net.runelite.client.game.ItemStack;
  * <p>
  * Image and title are decided upon loot being received in order to support things like random images
  */
-@Data
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class Loot
 {
 	@Nonnull
 	private final LootSource source;
 	@Nonnull
-	private final List<ItemStack> items;
-
+	@Getter
+	private final List<LootItem> items;
 	@Nonnull
+	@Getter
 	private LootImage image;
 	@Nonnull
+	@Getter
 	private String title;
 
 	public void updateImage(GauntletLootConfig config)
 	{
-		setImage(source.getImage(config));
+		image = source.getImage(config);
 	}
 
 	public void updateTitle(GauntletLootConfig config)
 	{
-		setTitle(source.getTitle(config));
+		title = source.getTitle(config);
 	}
 
-	public static Loot of(LootSource source, Collection<ItemStack> items, GauntletLootConfig config)
+	// For important loot return their actual examine text, otherwise just return the item name
+	public String getExamineText(int itemId, String itemName)
 	{
+		return getItems().stream()
+			.filter(item -> item.getId() == itemId).findFirst()
+			.map(LootItem::getExamineText).orElse(itemName);
+	}
+
+	public static Loot of(LootSource source, Collection<ItemStack> items, GauntletLootConfig config, Runnable playSound)
+	{
+		AtomicBoolean playedSound = new AtomicBoolean(false);
+
 		return new Loot(
 			source,
-			ImmutableList.copyOf(items),
+			source.getItems().stream()
+				.map(item -> {
+					ItemStack stack = items.stream().filter( it -> it.getId() == item.getItemId()).findFirst().orElse(null);
+
+					if (stack != null && item.shouldPlaySound(config) && !playedSound.getAndSet(true))
+					{
+						playSound.run();
+					}
+
+					return stack != null ? new LootItem(item, stack.getQuantity()) : null;
+				}).filter(Objects::nonNull)
+				.collect(Collectors.toList()),
 			source.getImage(config),
 			source.getTitle(config)
 		);
