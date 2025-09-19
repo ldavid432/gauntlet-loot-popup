@@ -54,18 +54,18 @@ public class Loot
 			items.stream()
 				.map(stack -> {
 					String itemName = itemManager.getItemComposition(stack.getId()).getName();
-					RareItem item = source.getRareItems()
+					RareItem rareItem = source.getRareItems()
 						.stream()
-						.filter(it -> it.getItemId() == stack.getId())
+						.filter(item -> item.getItemId() == stack.getId())
 						.findFirst()
 						.orElse(null);
 
-					if (item != null && item.shouldPlaySound(config) && !playedSound.getAndSet(true))
+					if (rareItem != null && rareItem.shouldPlaySound(config) && !playedSound.getAndSet(true))
 					{
 						playSound.run();
 					}
 
-					return item != null ? LootItem.fromRareItem(item, stack.getQuantity(), itemName) : LootItem.fromBasicItem(stack.getId(), stack.getQuantity(), itemName);
+					return rareItem != null ? LootItem.fromRareItem(rareItem, stack.getQuantity(), itemName) : LootItem.fromBasicItem(stack.getId(), stack.getQuantity(), itemName);
 				})
 				.collect(Collectors.toList()),
 			source.getImage(config),

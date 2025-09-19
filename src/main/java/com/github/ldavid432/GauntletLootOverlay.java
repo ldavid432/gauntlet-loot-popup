@@ -4,6 +4,7 @@ import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_HEIGHT;
 import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_WIDTH;
 import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import static com.github.ldavid432.GauntletLootUtil.rectangleFromImage;
+import com.github.ldavid432.loot.Loot;
 import com.github.ldavid432.loot.image.LootImage;
 import com.github.ldavid432.loot.item.LootItem;
 import java.awt.Color;
@@ -113,7 +114,9 @@ public class GauntletLootOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		if (!plugin.isDisplayed())
+		Loot loot = plugin.getLoot();
+
+		if (loot == null)
 		{
 			resetBounds();
 			return null;
@@ -124,14 +127,14 @@ public class GauntletLootOverlay extends Overlay
 			setBounds(getOverlayBounds(BACKGROUND_WIDTH, BACKGROUND_HEIGHT));
 			graphics.drawImage(backgroundImage, 0, 0, null);
 
-			LootImage lootImage = plugin.getLoot().getImage();
+			LootImage lootImage = loot.getImage();
 			BufferedImage image = getImage(lootImage.getPath());
 			if (image != null)
 			{
 				lootImage.renderImage(graphics, image);
 			}
 
-			renderTitle(graphics);
+			renderTitle(graphics, loot.getTitle());
 
 			final BufferedImage closeButtonImage = getCloseButtonImage();
 			if (closeButtonImage != null)
@@ -139,15 +142,14 @@ public class GauntletLootOverlay extends Overlay
 				renderCloseButton(graphics, closeButtonImage);
 			}
 
-			renderItems(graphics, plugin.getLoot().getItems());
+			renderItems(graphics, loot.getItems());
 		}
 
 		return getBounds().getSize();
 	}
 
-	private void renderTitle(Graphics2D graphics)
+	private void renderTitle(Graphics2D graphics, String title)
 	{
-		String title = plugin.getLoot().getTitle();
 		graphics.setFont(FontManager.getRunescapeBoldFont());
 
 		// Measure
@@ -286,6 +288,7 @@ public class GauntletLootOverlay extends Overlay
 
 	public void shutDown()
 	{
+		resetBounds();
 		imageCache.clear();
 	}
 }
