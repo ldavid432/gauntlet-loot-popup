@@ -6,6 +6,7 @@ import com.github.ldavid432.config.GauntletTitle;
 import com.github.ldavid432.config.GauntletTitle2;
 import com.github.ldavid432.loot.Loot;
 import com.github.ldavid432.loot.LootSource;
+import com.github.ldavid432.loot.item.LootItem;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Provides;
 import java.awt.Color;
@@ -125,8 +126,10 @@ public class GauntletLootPlugin extends Plugin
 	@Override
 	protected void shutDown() throws Exception
 	{
+		clearLoot();
 		client.getCanvas().removeKeyListener(keyListener);
 		mouseManager.unregisterMouseListener(mouseListener);
+		overlay.shutDown();
 		overlayManager.remove(overlay);
 	}
 
@@ -217,9 +220,9 @@ public class GauntletLootPlugin extends Plugin
 			.ifPresent(source -> {
 				log.debug("Displaying Gauntlet popup. Source: {}", source.getSourceName());
 
-				loot = Loot.of(source, lootItems, config, () -> {
+				loot = Loot.of(source, lootItems, config, itemManager, () -> {
 					log.debug("Playing rare item sound for Gauntlet loot");
-					// Muspah rare item sound
+					// Rare item sound
 					client.playSoundEffect(6765);
 				});
 			});
@@ -261,8 +264,8 @@ public class GauntletLootPlugin extends Plugin
 						}
 						else
 						{
-							Integer itemId = overlay.getItemClicked(event.getPoint());
-							if (itemId != null)
+							LootItem item = overlay.getItemClicked(event.getPoint());
+							if (item != null)
 							{
 								// Don't consume event so the menu can be triggered
 								return event;
@@ -294,23 +297,22 @@ public class GauntletLootPlugin extends Plugin
 		{
 			Point mousePos = getMousePosition(client);
 
-			Integer itemId = overlay.getItemClicked(mousePos);
-			if (itemId != null)
-			{
-				final String itemName = itemManager.getItemComposition(itemId).getName();
+			LootItem item = overlay.getItemClicked(mousePos);
 
+			if (item != null)
+			{
 				final Menu menu = client.getMenu();
 
 				MenuEntry examine = menu.createMenuEntry(-1)
 					.setOption("Examine")
-					.setTarget(ColorUtil.wrapWithColorTag(itemName, JagexColors.MENU_TARGET))
+					.setTarget(ColorUtil.wrapWithColorTag(item.getItemName(), JagexColors.MENU_TARGET))
 					.setType(MenuAction.RUNELITE)
-					.setItemId(itemId)
+					.setItemId(item.getId())
 					.setIdentifier(MENU_EXAMINE_ID)
 					.onClick(
 						entry -> {
 							log.debug("Examining Gauntlet popup item");
-							client.addChatMessage(ChatMessageType.ITEM_EXAMINE, "", loot.getExamineText(entry.getItemId(), itemName), "");
+							client.addChatMessage(ChatMessageType.ITEM_EXAMINE, "", item.getExamineText(), "");
 						}
 					);
 

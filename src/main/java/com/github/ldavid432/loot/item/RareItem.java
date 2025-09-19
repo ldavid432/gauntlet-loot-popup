@@ -1,4 +1,4 @@
-package com.github.ldavid432.loot;
+package com.github.ldavid432.loot.item;
 
 import com.github.ldavid432.GauntletLootConfig;
 import java.util.function.Function;
@@ -7,10 +7,10 @@ import lombok.Getter;
 import net.runelite.api.gameval.ItemID;
 
 /**
- * Notable items to play a sound for and/or make examinable in the popup
+ * "Rare" or notable items to play a sound for and/or make examinable in the popup
  */
 @AllArgsConstructor
-public enum Item
+public enum RareItem
 {
 	// Gauntlet
 	CRYSTAL_WEAPON_SEED(ItemID.CRYSTAL_SEED_OLD, "A seed to be sung into the finest crystal weapons.", GauntletLootConfig::shouldPlayWeaponSeedSound),
@@ -34,7 +34,7 @@ public enum Item
 	}
 
 	// Examine text only constructor
-	Item(int itemId, String examineText)
+	RareItem(int itemId, String examineText)
 	{
 		this(itemId, examineText, c -> false);
 	}

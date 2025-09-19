@@ -4,8 +4,8 @@ import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_HEIGHT;
 import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_WIDTH;
 import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import static com.github.ldavid432.GauntletLootUtil.rectangleFromImage;
-import com.github.ldavid432.loot.LootImage;
-import com.github.ldavid432.loot.LootItem;
+import com.github.ldavid432.loot.image.LootImage;
+import com.github.ldavid432.loot.item.LootItem;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -13,11 +13,9 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import net.runelite.api.Client;
@@ -45,7 +43,7 @@ public class GauntletLootOverlay extends Overlay
 	private final ArrayList<Pair<String, BufferedImage>> imageCache = new ArrayList<>();
 
 	private Rectangle closeButtonBounds;
-	private final Map<Integer, Rectangle> itemBounds = new HashMap<>();
+	private final List<Pair<LootItem, Rectangle>> itemBounds = new ArrayList<>();
 
 	@Inject
 	public GauntletLootOverlay(GauntletLootPlugin plugin, Client client, ItemManager itemManager, SpriteManager spriteManager)
@@ -185,6 +183,8 @@ public class GauntletLootOverlay extends Overlay
 		int x = 110;
 		int y = 40;
 
+		itemBounds.clear();
+
 		for (int i = 0; i < items.size(); i++)
 		{
 			LootItem item = items.get(i);
@@ -205,7 +205,7 @@ public class GauntletLootOverlay extends Overlay
 			{
 				graphics.drawImage(itemImage, x, y, null);
 
-				itemBounds.put(itemId, rectangleFromImage(x, y, itemImage));
+				itemBounds.add(Pair.of(item, rectangleFromImage(x, y, itemImage)));
 
 				if ((i + 1) % 3 == 0)
 				{
@@ -237,25 +237,18 @@ public class GauntletLootOverlay extends Overlay
 		return closeButtonBounds != null && getBounds() != null && getOffsetBounds(closeButtonBounds).contains(point);
 	}
 
-	public Integer getItemClicked(Point point)
+	public LootItem getItemClicked(Point point)
 	{
-		AtomicReference<Integer> id = new AtomicReference<>();
-
 		if (getBounds() == null)
 		{
 			return null;
 		}
 
-		itemBounds.forEach(
-			(key, bounds) -> {
-				if (getOffsetBounds(bounds).contains(point))
-				{
-					id.set(key);
-				}
-			}
-		);
-
-		return id.get();
+		return itemBounds.stream()
+			.filter(pair -> getOffsetBounds(pair.getValue()).contains(point))
+			.findFirst()
+			.map(Map.Entry::getKey)
+			.orElse(null);
 	}
 
 	// Translate bounds from inside the overlay to their global position in the window/canvas
@@ -289,5 +282,10 @@ public class GauntletLootOverlay extends Overlay
 		}
 
 		return new Rectangle(x, y, width, height);
+	}
+
+	public void shutDown()
+	{
+		imageCache.clear();
 	}
 }

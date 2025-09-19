@@ -1,4 +1,4 @@
-package com.github.ldavid432.loot;
+package com.github.ldavid432.loot.image;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -17,4 +17,3 @@ public class LootImage
 		graphics.drawImage(image, x, y, null);
 	}
 }
-
