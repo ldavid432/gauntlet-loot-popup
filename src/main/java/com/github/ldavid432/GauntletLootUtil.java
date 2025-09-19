@@ -1,6 +1,6 @@
 package com.github.ldavid432;
 
-import com.github.ldavid432.loot.Item;
+import com.github.ldavid432.loot.item.RareItem;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -37,14 +37,14 @@ public class GauntletLootUtil
 
 	public static final String HUNLLEF = "Crystalline Hunllef";
 	public static final String CORRUPTED_HUNLLEF = "Corrupted Hunllef";
-	public static final List<Item> GAUNTLET_ITEMS = List.of(
-		Item.CRYSTAL_WEAPON_SEED,
-		Item.CRYSTAL_ARMOUR_SEED,
-		Item.ENHANCED_WEAPON_SEED,
-		Item.YOUNGLLEF,
-		Item.ELITE_SCROLL_BOX,
-		Item.GAUNTLET_CAPE,
-		Item.CRYSTAL_SHARD
+	public static final List<RareItem> GAUNTLET_ITEMS = List.of(
+		RareItem.CRYSTAL_WEAPON_SEED,
+		RareItem.CRYSTAL_ARMOUR_SEED,
+		RareItem.ENHANCED_WEAPON_SEED,
+		RareItem.YOUNGLLEF,
+		RareItem.ELITE_SCROLL_BOX,
+		RareItem.GAUNTLET_CAPE,
+		RareItem.CRYSTAL_SHARD
 	);
 
 }

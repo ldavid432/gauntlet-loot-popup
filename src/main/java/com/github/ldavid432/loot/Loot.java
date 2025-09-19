@@ -1,15 +1,18 @@
 package com.github.ldavid432.loot;
 
 import com.github.ldavid432.GauntletLootConfig;
+import com.github.ldavid432.loot.image.LootImage;
+import com.github.ldavid432.loot.item.LootItem;
+import com.github.ldavid432.loot.item.RareItem;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemStack;
 
 /**
@@ -42,31 +45,28 @@ public class Loot
 		title = source.getTitle(config);
 	}
 
-	// For important loot return their actual examine text, otherwise just return the item name
-	public String getExamineText(int itemId, String itemName)
-	{
-		return getItems().stream()
-			.filter(item -> item.getId() == itemId).findFirst()
-			.map(LootItem::getExamineText).orElse(itemName);
-	}
-
-	public static Loot of(LootSource source, Collection<ItemStack> items, GauntletLootConfig config, Runnable playSound)
+	public static Loot of(LootSource source, Collection<ItemStack> items, GauntletLootConfig config, ItemManager itemManager, Runnable playSound)
 	{
 		AtomicBoolean playedSound = new AtomicBoolean(false);
 
 		return new Loot(
 			source,
-			source.getItems().stream()
-				.map(item -> {
-					ItemStack stack = items.stream().filter( it -> it.getId() == item.getItemId()).findFirst().orElse(null);
+			items.stream()
+				.map(stack -> {
+					String itemName = itemManager.getItemComposition(stack.getId()).getName();
+					RareItem item = source.getRareItems()
+						.stream()
+						.filter(it -> it.getItemId() == stack.getId())
+						.findFirst()
+						.orElse(null);
 
-					if (stack != null && item.shouldPlaySound(config) && !playedSound.getAndSet(true))
+					if (item != null && item.shouldPlaySound(config) && !playedSound.getAndSet(true))
 					{
 						playSound.run();
 					}
 
-					return stack != null ? new LootItem(item, stack.getQuantity()) : null;
-				}).filter(Objects::nonNull)
+					return item != null ? LootItem.fromRareItem(item, stack.getQuantity(), itemName) : LootItem.fromBasicItem(stack.getId(), stack.getQuantity(), itemName);
+				})
 				.collect(Collectors.toList()),
 			source.getImage(config),
 			source.getTitle(config)
