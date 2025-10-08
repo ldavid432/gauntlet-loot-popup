@@ -28,6 +28,10 @@ public class GauntletLootUtil
 		return new Point(rlMousePos.getX(), rlMousePos.getY());
 	}
 
+	public static boolean isVowel(char c) {
+		return "AEIOUaeiou".indexOf(c) != -1;
+	}
+
 	public static final int BACKGROUND_WIDTH = 230;
 	public static final int BACKGROUND_HEIGHT = 200;
 

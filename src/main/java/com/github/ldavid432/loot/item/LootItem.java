@@ -1,5 +1,6 @@
 package com.github.ldavid432.loot.item;
 
+import static com.github.ldavid432.GauntletLootUtil.isVowel;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,6 +26,25 @@ public class LootItem
 	}
 
 	public static LootItem fromBasicItem(int itemId, int quantity, String itemName){
-		return new LootItem(itemId, itemName, quantity, itemName);
+		return new LootItem(itemId, basicExamineText(itemName, quantity), quantity, itemName);
+	}
+
+	private static String basicExamineText(String itemName, int quantity)
+	{
+		if (quantity <= 1)
+		{
+			if (!itemName.isEmpty() && isVowel(itemName.charAt(0)))
+			{
+				return "An " + itemName;
+			}
+			else
+			{
+				return "A " + itemName;
+			}
+		}
+		else
+		{
+			return itemName + " x " + quantity;
+		}
 	}
 }
