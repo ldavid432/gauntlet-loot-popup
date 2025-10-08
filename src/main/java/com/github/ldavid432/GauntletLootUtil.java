@@ -47,4 +47,5 @@ public class GauntletLootUtil
 		RareItem.CRYSTAL_SHARD
 	);
 
+	public static final int IMAGE_CACHE_LIMIT = 10;
 }

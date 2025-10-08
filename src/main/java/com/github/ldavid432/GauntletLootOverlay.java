@@ -2,6 +2,7 @@ package com.github.ldavid432;
 
 import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_HEIGHT;
 import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_WIDTH;
+import static com.github.ldavid432.GauntletLootUtil.IMAGE_CACHE_LIMIT;
 import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import static com.github.ldavid432.GauntletLootUtil.rectangleFromImage;
 import com.github.ldavid432.loot.Loot;
@@ -15,10 +16,10 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import lombok.Value;
 import net.runelite.api.Client;
 import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.game.ItemManager;
@@ -44,7 +45,14 @@ public class GauntletLootOverlay extends Overlay
 	private final ArrayList<Pair<String, BufferedImage>> imageCache = new ArrayList<>();
 
 	private Rectangle closeButtonBounds;
-	private final List<Pair<LootItem, Rectangle>> itemBounds = new ArrayList<>();
+	private final List<LootItemBounds> itemBounds = new ArrayList<>();
+
+	@Value
+	private static class LootItemBounds
+	{
+		LootItem item;
+		Rectangle bounds;
+	}
 
 	@Inject
 	public GauntletLootOverlay(GauntletLootPlugin plugin, Client client, ItemManager itemManager, SpriteManager spriteManager)
@@ -101,7 +109,7 @@ public class GauntletLootOverlay extends Overlay
 			if (image != null)
 			{
 				imageCache.add(Pair.of(imagePath, image));
-				if (imageCache.size() > 10)
+				if (imageCache.size() > IMAGE_CACHE_LIMIT)
 				{
 					imageCache.remove(0);
 				}
@@ -207,7 +215,7 @@ public class GauntletLootOverlay extends Overlay
 			{
 				graphics.drawImage(itemImage, x, y, null);
 
-				itemBounds.add(Pair.of(item, rectangleFromImage(x, y, itemImage)));
+				itemBounds.add(new LootItemBounds(item, rectangleFromImage(x, y, itemImage)));
 
 				if ((i + 1) % 3 == 0)
 				{
@@ -247,9 +255,9 @@ public class GauntletLootOverlay extends Overlay
 		}
 
 		return itemBounds.stream()
-			.filter(pair -> getOffsetBounds(pair.getValue()).contains(point))
+			.filter(item -> getOffsetBounds(item.getBounds()).contains(point))
 			.findFirst()
-			.map(Map.Entry::getKey)
+			.map(LootItemBounds::getItem)
 			.orElse(null);
 	}
 
