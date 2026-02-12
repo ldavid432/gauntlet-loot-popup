@@ -3,7 +3,6 @@ package com.github.ldavid432.loot;
 import com.github.ldavid432.GauntletLootConfig;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -56,17 +55,18 @@ public class Loot
 
 		return new Loot(
 			source,
-			source.getItems().stream()
-				.map(item -> {
-					ItemStack stack = items.stream().filter( it -> it.getId() == item.getItemId()).findFirst().orElse(null);
+			items.stream()
+				.map(stack -> {
+						Item item = source.getItems().stream().filter(it -> it.getItemId() == stack.getId()).findFirst().orElse(null);
 
-					if (stack != null && item.shouldPlaySound(config) && !playedSound.getAndSet(true))
-					{
-						playSound.run();
+						if (item != null && item.shouldPlaySound(config) && !playedSound.getAndSet(true))
+						{
+							playSound.run();
+						}
+
+						return item != null ? new LootItem(item, stack.getQuantity()) : new LootItem(stack.getId(), null, stack.getQuantity());
 					}
-
-					return stack != null ? new LootItem(item, stack.getQuantity()) : null;
-				}).filter(Objects::nonNull)
+				)
 				.collect(Collectors.toList()),
 			source.getImage(config),
 			source.getTitle(config)
