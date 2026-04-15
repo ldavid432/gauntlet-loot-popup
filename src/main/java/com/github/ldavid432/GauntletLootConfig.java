@@ -172,6 +172,30 @@ public interface GauntletLootConfig extends Config
 	}
 
 	@ConfigItem(
+		name = "Echo Orb (Leagues)",
+		description = "Play rare item sound for the Leagues Echo Orb",
+		keyName = "playEchoOrbSound",
+		section = soundsSection,
+		position = 5
+	)
+	default boolean shouldPlayEchoOrbSound()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		name = "Crystal Blessing (Leagues)",
+		description = "Play rare item sound for the Leagues Crystal Blessing",
+		keyName = "playCrystalBlessingSound",
+		section = soundsSection,
+		position = 6
+	)
+	default boolean shouldPlayCrystalBlessingSound()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		name = "",
 		description = "",
 		keyName = "lastSeenVersion",

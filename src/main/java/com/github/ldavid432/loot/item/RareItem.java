@@ -20,6 +20,9 @@ public enum RareItem
 	ELITE_SCROLL_BOX(ItemID.LEAGUE_CLUE_BOX_ELITE, "Contains an elite clue scroll.", GauntletLootConfig::shouldPlayEliteClueSound),
 	GAUNTLET_CAPE(ItemID.GAUNTLET_CRYSTALLINE_CAPE, "Earned by only the most accomplished warriors of Prifddinas."),
 	CRYSTAL_SHARD(ItemID.PRIF_CRYSTAL_SHARD, "A shard of the finest crystal, from the crystal city itself."),
+	// Leagues
+	ECHO_ORB(ItemID.BESTIAL_ECHOING_ORB, "Crystallised, bestial rage swirls within it...", GauntletLootConfig::shouldPlayEchoOrbSound),
+	CRYSTAL_BLESSING(ItemID.CRYSTAL_BLESSING, "A powerful crystal blessing that warps the crystalline nature of reality.", GauntletLootConfig::shouldPlayCrystalBlessingSound),
 	;
 
 	@Getter

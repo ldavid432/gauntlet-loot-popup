@@ -41,6 +41,7 @@ public class GauntletLootUtil
 
 	public static final String HUNLLEF = "Crystalline Hunllef";
 	public static final String CORRUPTED_HUNLLEF = "Corrupted Hunllef";
+	public static final String CORRUPTED_HUNLLEF_ECHO = "Corrupted Hunllef (Echo)";
 	public static final List<RareItem> GAUNTLET_ITEMS = List.of(
 		RareItem.CRYSTAL_WEAPON_SEED,
 		RareItem.CRYSTAL_ARMOUR_SEED,
@@ -50,6 +51,11 @@ public class GauntletLootUtil
 		RareItem.GAUNTLET_CAPE,
 		RareItem.CRYSTAL_SHARD
 	);
+	public static final List<RareItem> LEAGUES_ITEMS = List.of(
+		RareItem.ECHO_ORB,
+		RareItem.CRYSTAL_BLESSING
+	);
+
 
 	public static final int IMAGE_CACHE_LIMIT = 10;
 }
