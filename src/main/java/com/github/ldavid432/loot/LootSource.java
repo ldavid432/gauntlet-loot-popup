@@ -5,7 +5,7 @@ import static com.github.ldavid432.GauntletLootUtil.CORRUPTED_HUNLLEF;
 import static com.github.ldavid432.GauntletLootUtil.CORRUPTED_HUNLLEF_ECHO;
 import static com.github.ldavid432.GauntletLootUtil.GAUNTLET_ITEMS;
 import static com.github.ldavid432.GauntletLootUtil.HUNLLEF;
-import static com.github.ldavid432.GauntletLootUtil.createList;
+import static com.github.ldavid432.GauntletLootUtil.staticListOf;
 import com.github.ldavid432.config.GauntletChestColor;
 import com.github.ldavid432.loot.image.GauntletLootImage;
 import com.github.ldavid432.loot.image.LootImage;
@@ -31,13 +31,14 @@ public enum LootSource
 		CORRUPTED_HUNLLEF,
 		config -> config.getChestTitle2().getText(config, CORRUPTED_HUNLLEF, "The Corrupted Gauntlet"),
 		config -> new GauntletLootImage(config, GauntletChestColor.CORRUPTED),
-		createList(GAUNTLET_ITEMS, RareItem.ECHO_ORB)
+		// Adding both here because I'm not 100% sure how the loot drop is attributed
+		staticListOf(GAUNTLET_ITEMS, RareItem.ECHO_ORB, RareItem.CRYSTAL_BLESSING)
 	),
 	ECHO_CORRUPTED_GAUNTLET(
 		CORRUPTED_HUNLLEF_ECHO,
 		config -> config.getChestTitle2().getText(config, CORRUPTED_HUNLLEF_ECHO, "The Echo Gauntlet"),
 		config -> new GauntletLootImage(config, GauntletChestColor.CORRUPTED),
-		createList(GAUNTLET_ITEMS, RareItem.CRYSTAL_BLESSING)
+		staticListOf(GAUNTLET_ITEMS, RareItem.CRYSTAL_BLESSING)
 	),
 	;
 

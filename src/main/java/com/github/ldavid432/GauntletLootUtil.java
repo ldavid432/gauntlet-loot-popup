@@ -53,9 +53,9 @@ public class GauntletLootUtil
 		RareItem.CRYSTAL_SHARD
 	);
 
-	public static  <T> List<T> createList(List<T> list, T item) {
+	public static <T> List<T> staticListOf(List<T> list, T... items) {
 		List<T> newList = new ArrayList<>(list);
-		newList.add(item);
+		newList.addAll(List.of(items));
 		return newList;
 	}
 
