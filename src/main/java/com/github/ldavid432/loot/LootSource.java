@@ -5,13 +5,11 @@ import static com.github.ldavid432.GauntletLootUtil.CORRUPTED_HUNLLEF;
 import static com.github.ldavid432.GauntletLootUtil.CORRUPTED_HUNLLEF_ECHO;
 import static com.github.ldavid432.GauntletLootUtil.GAUNTLET_ITEMS;
 import static com.github.ldavid432.GauntletLootUtil.HUNLLEF;
-import static com.github.ldavid432.GauntletLootUtil.LEAGUES_ITEMS;
+import static com.github.ldavid432.GauntletLootUtil.createList;
 import com.github.ldavid432.config.GauntletChestColor;
 import com.github.ldavid432.loot.image.GauntletLootImage;
 import com.github.ldavid432.loot.image.LootImage;
 import com.github.ldavid432.loot.item.RareItem;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.function.Function;
 import lombok.AllArgsConstructor;
@@ -33,13 +31,13 @@ public enum LootSource
 		CORRUPTED_HUNLLEF,
 		config -> config.getChestTitle2().getText(config, CORRUPTED_HUNLLEF, "The Corrupted Gauntlet"),
 		config -> new GauntletLootImage(config, GauntletChestColor.CORRUPTED),
-		GAUNTLET_ITEMS
+		createList(GAUNTLET_ITEMS, RareItem.ECHO_ORB)
 	),
 	ECHO_CORRUPTED_GAUNTLET(
 		CORRUPTED_HUNLLEF_ECHO,
 		config -> config.getChestTitle2().getText(config, CORRUPTED_HUNLLEF_ECHO, "The Echo Gauntlet"),
 		config -> new GauntletLootImage(config, GauntletChestColor.CORRUPTED),
-		Lists.newArrayList(Iterables.concat(GAUNTLET_ITEMS, LEAGUES_ITEMS))
+		createList(GAUNTLET_ITEMS, RareItem.CRYSTAL_BLESSING)
 	),
 	;
 

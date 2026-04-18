@@ -4,6 +4,7 @@ import com.github.ldavid432.loot.item.RareItem;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
@@ -51,10 +52,12 @@ public class GauntletLootUtil
 		RareItem.GAUNTLET_CAPE,
 		RareItem.CRYSTAL_SHARD
 	);
-	public static final List<RareItem> LEAGUES_ITEMS = List.of(
-		RareItem.ECHO_ORB,
-		RareItem.CRYSTAL_BLESSING
-	);
+
+	public static  <T> List<T> createList(List<T> list, T item) {
+		List<T> newList = new ArrayList<>(list);
+		newList.add(item);
+		return newList;
+	}
 
 
 	public static final int IMAGE_CACHE_LIMIT = 10;
