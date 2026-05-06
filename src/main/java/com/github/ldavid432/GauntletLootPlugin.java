@@ -1,5 +1,6 @@
 package com.github.ldavid432;
 
+import static com.github.ldavid432.GauntletLootUtil.KC_PATTERN;
 import static com.github.ldavid432.GauntletLootUtil.anyMenuEntry;
 import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import com.github.ldavid432.config.GauntletTitle;
@@ -18,6 +19,7 @@ import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.regex.Matcher;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import lombok.Getter;
@@ -29,6 +31,7 @@ import net.runelite.api.GameState;
 import net.runelite.api.Menu;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
+import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.CommandExecuted;
 import net.runelite.api.events.GameStateChanged;
@@ -87,6 +90,18 @@ public class GauntletLootPlugin extends Plugin
 	@Setter
 	private Loot loot = null;
 
+	/**
+	 * Last kill count seen. Since this message appears as soon as you complete the gauntlet we are safe to store it
+	 * and show it in the UI without bothering to check which particular type of gauntlet it is.
+	 * <br>
+	 * The only time this causes an issue is if the user closes RL before opening the chest
+	 */
+	@Getter
+	private int lastKillCount = 0;
+
+	@Getter
+	private boolean isShowKillCountEnabled = false;
+
 	@Override
 	protected void startUp() throws Exception
 	{
@@ -115,12 +130,14 @@ public class GauntletLootPlugin extends Plugin
 				chatMessageManager.queue(
 					QueuedMessage.builder()
 						.type(ChatMessageType.CONSOLE)
-						.runeLiteFormattedMessage(ColorUtil.wrapWithColorTag("Gauntlet Chest Popup has been updated! The popup is now movable!", Color.RED))
+						.runeLiteFormattedMessage(ColorUtil.wrapWithColorTag("Gauntlet Chest Popup has been updated! There is now an option to display your KC in the title.", Color.RED))
 						.build()
 				);
 			}
 			config.setLastSeenVersion(GauntletLootConfig.CURRENT_VERSION);
 		}
+
+		isShowKillCountEnabled = config.isShowKillCountEnabled();
 	}
 
 	@Override
@@ -148,6 +165,11 @@ public class GauntletLootPlugin extends Plugin
 				{
 					loot.updateTitle(config);
 				}
+			}
+
+			if (Objects.equals(configChanged.getKey(), GauntletLootConfig.SHOW_KC))
+			{
+				isShowKillCountEnabled = config.isShowKillCountEnabled();
 			}
 		}
 	}
@@ -189,6 +211,32 @@ public class GauntletLootPlugin extends Plugin
 	}
 
 	@Subscribe
+	public void onChatMessage(ChatMessage event)
+	{
+		if (event.getType() == ChatMessageType.GAMEMESSAGE && event.getMessage() != null)
+		{
+			Matcher matcher = KC_PATTERN.matcher(event.getMessage());
+			if (matcher.matches())
+			{
+				Integer kc;
+				try
+				{
+					kc = Integer.parseInt(matcher.group(1).replace(",", ""));
+				}
+				catch (Exception ignored)
+				{
+					kc = null;
+				}
+
+				if (kc != null)
+				{
+					lastKillCount = kc;
+				}
+			}
+		}
+	}
+
+	@Subscribe
 	public void onServerNpcLoot(ServerNpcLoot event)
 	{
 		if (event.getComposition() == null ||
@@ -220,7 +268,7 @@ public class GauntletLootPlugin extends Plugin
 			.ifPresent(source -> {
 				log.debug("Displaying Gauntlet popup. Source: {}", source.getSourceName());
 
-				loot = Loot.of(source, lootItems, config, itemManager, () -> {
+				loot = Loot.of(source, lootItems, lastKillCount, config, itemManager, () -> {
 					log.debug("Playing rare item sound for Gauntlet loot");
 					// Rare item sound
 					client.playSoundEffect(6765);

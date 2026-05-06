@@ -14,7 +14,8 @@ public interface GauntletLootConfig extends Config
 	String GROUP = "gauntletchestpopup";
 	String CHEST_COLOR = "chestSpriteColor";
 	String CHEST_TITLE = "chestTitleText2";
-	int CURRENT_VERSION = 1;
+	String SHOW_KC = "showKillCount";
+	int CURRENT_VERSION = 2;
 
 	@ConfigItem(
 		name = "Click outside to dismiss",
@@ -100,6 +101,18 @@ public interface GauntletLootConfig extends Config
 	default String getChestCustomTitle()
 	{
 		return "Red Prison";
+	}
+
+	@ConfigItem(
+		name = "Show Kill Count",
+		description = "Show your gauntlet (or corrupted gauntlet) kill count in the title",
+		keyName = SHOW_KC,
+		section = chestSection,
+		position = 3
+	)
+	default boolean isShowKillCountEnabled()
+	{
+		return false;
 	}
 
 	@ConfigSection(

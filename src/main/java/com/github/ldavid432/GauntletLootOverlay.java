@@ -14,8 +14,10 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -142,7 +144,7 @@ public class GauntletLootOverlay extends Overlay
 				lootImage.renderImage(graphics, image);
 			}
 
-			renderTitle(graphics, loot.getTitle());
+			renderTitle(graphics, loot.getTitle(), plugin.getLastKillCount());
 
 			final BufferedImage closeButtonImage = getCloseButtonImage();
 			if (closeButtonImage != null)
@@ -156,13 +158,21 @@ public class GauntletLootOverlay extends Overlay
 		return getBounds().getSize();
 	}
 
-	private void renderTitle(Graphics2D graphics, String title)
+	private void renderTitle(Graphics2D graphics, String title, int killCount)
 	{
+		boolean showKillCount = plugin.isShowKillCountEnabled() && killCount > 0;
+		if (showKillCount)
+		{
+			title = title + " - " + NumberFormat.getNumberInstance(Locale.UK).format(killCount) + " KC";
+		}
+
 		graphics.setFont(FontManager.getRunescapeBoldFont());
 
 		// Measure
 		Rectangle titleBounds = graphics.getFontMetrics().getStringBounds(title, graphics).getBounds();
-		int titleX = (backgroundImage.getWidth() / 2) - ((int) titleBounds.getWidth() / 2);
+		// Center on background when not showing KC, center on available space when showing KC
+		int titleAreaWidth = showKillCount ? (backgroundImage.getWidth() - closeButtonImage.getWidth()) / 2 : backgroundImage.getWidth() / 2;
+		int titleX = titleAreaWidth - ((int) titleBounds.getWidth() / 2);
 		int titleY = 25;
 
 		// Draw shadow

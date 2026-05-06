@@ -10,8 +10,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemStack;
 
@@ -20,7 +20,7 @@ import net.runelite.client.game.ItemStack;
  * <p>
  * Image and title are decided upon loot being received in order to support things like random images
  */
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Loot
 {
 	@Nonnull
@@ -35,6 +35,9 @@ public class Loot
 	@Getter
 	private String title;
 
+	@Getter
+	private int killCount;
+
 	public void updateImage(GauntletLootConfig config)
 	{
 		image = source.getImage(config);
@@ -45,7 +48,7 @@ public class Loot
 		title = source.getTitle(config);
 	}
 
-	public static Loot of(LootSource source, Collection<ItemStack> items, GauntletLootConfig config, ItemManager itemManager, Runnable playSound)
+	public static Loot of(LootSource source, Collection<ItemStack> items, int killCount, GauntletLootConfig config, ItemManager itemManager, Runnable playSound)
 	{
 		AtomicBoolean playedSound = new AtomicBoolean(false);
 
@@ -69,7 +72,8 @@ public class Loot
 				})
 				.collect(Collectors.toList()),
 			source.getImage(config),
-			source.getTitle(config)
+			source.getTitle(config),
+			killCount
 		);
 	}
 }
