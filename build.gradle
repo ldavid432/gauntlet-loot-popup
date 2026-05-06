@@ -35,7 +35,6 @@ dependencies {
 }
 
 group = 'com.github.ldavid432'
-version = '1.4.3'
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = 'UTF-8'
