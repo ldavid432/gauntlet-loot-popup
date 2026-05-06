@@ -9,9 +9,10 @@
   - Auto: Automatically switches to original or corrupted depending on which one you completed
   - Standard colors: original (light blue), corrupted (red), blue, green, yellow, white, purple
 - Chest title
-  - Gauntlet: Automatically switches to The Gauntlet or The Corrupted Gauntlet depending on which one you completed
-  - Hunllef: Automatically switches to Crystalline or Corrupted Hunllef depending on which one you completed
-  - Custom: Uses custom title
+  - Gauntlet: Automatically switches to `Gauntlet` or `Corrupted Gauntlet` depending on which one you completed
+  - Hunllef: Automatically switches to `Crystalline Hunllef` or `Corrupted Hunllef` depending on which one you completed
+  - Custom: Uses custom title text
+  - Show Kill Count: Shows your current kill count in the title (default: `false`)
 - Which items the rare item sound is played for
   - Weapon seed, Armour seed, Enhanced Weapon seed, Youngllef (Pet) and/or Elite scroll boxes
 

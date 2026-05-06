@@ -105,7 +105,8 @@ public interface GauntletLootConfig extends Config
 
 	@ConfigItem(
 		name = "Show Kill Count",
-		description = "Show your gauntlet (or corrupted gauntlet) kill count in the title",
+		description = "Show your gauntlet (or corrupted gauntlet) kill count in the title<br>" +
+			"Note: Will not show if you die or if the kill and chest opening happen in different sessions",
 		keyName = SHOW_KC,
 		section = chestSection,
 		position = 3

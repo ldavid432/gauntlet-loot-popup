@@ -182,6 +182,7 @@ public class GauntletLootPlugin extends Plugin
 	private void clearLoot()
 	{
 		loot = null;
+		lastKillCount = 0;
 	}
 
 	@Subscribe
