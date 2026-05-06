@@ -190,7 +190,7 @@ public class GauntletLootOverlay extends Overlay
 
 	private void renderItems(Graphics2D graphics, List<LootItem> items)
 	{
-		int x = 110;
+		int x = 120;
 		int y = 40;
 
 		itemBounds.clear();
