@@ -143,9 +143,10 @@ public class GauntletLootOverlay extends Overlay
 				lootImage.renderImage(graphics, image);
 			}
 
-			renderTitle(graphics, loot.getTitle(), plugin.getLastKillCount());
-
 			final BufferedImage closeButtonImage = getCloseButtonImage();
+
+			renderTitle(graphics, loot.getTitle(), plugin.getLastKillCount(), closeButtonImage);
+			
 			if (closeButtonImage != null)
 			{
 				renderCloseButton(graphics, closeButtonImage);
@@ -157,7 +158,7 @@ public class GauntletLootOverlay extends Overlay
 		return getBounds().getSize();
 	}
 
-	private void renderTitle(Graphics2D graphics, String title, int killCount)
+	private void renderTitle(Graphics2D graphics, String title, int killCount, BufferedImage closeButtonImage)
 	{
 		boolean showKillCount = plugin.isShowKillCountEnabled() && killCount > 0;
 		if (showKillCount)
