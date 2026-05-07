@@ -146,7 +146,7 @@ public class GauntletLootOverlay extends Overlay
 			final BufferedImage closeButtonImage = getCloseButtonImage();
 
 			renderTitle(graphics, loot.getTitle(), plugin.getLastKillCount(), closeButtonImage);
-			
+
 			if (closeButtonImage != null)
 			{
 				renderCloseButton(graphics, closeButtonImage);
