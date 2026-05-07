@@ -3,6 +3,7 @@ package com.github.ldavid432;
 import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_HEIGHT;
 import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_WIDTH;
 import static com.github.ldavid432.GauntletLootUtil.IMAGE_CACHE_LIMIT;
+import static com.github.ldavid432.GauntletLootUtil.KC_FORMAT;
 import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import static com.github.ldavid432.GauntletLootUtil.rectangleFromImage;
 import com.github.ldavid432.loot.Loot;
@@ -14,10 +15,8 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -163,7 +162,7 @@ public class GauntletLootOverlay extends Overlay
 		boolean showKillCount = plugin.isShowKillCountEnabled() && killCount > 0;
 		if (showKillCount)
 		{
-			title = title + " - " + NumberFormat.getNumberInstance(Locale.UK).format(killCount) + " KC";
+			title = title + " - " + KC_FORMAT.format(killCount) + " KC";
 		}
 
 		graphics.setFont(FontManager.getRunescapeBoldFont());
