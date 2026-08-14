@@ -6,6 +6,8 @@ import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import static com.github.ldavid432.GauntletLootUtil.rectangleFromImage;
 import com.github.ldavid432.loot.image.LootImage;
 import com.github.ldavid432.loot.item.LootItem;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -15,7 +17,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import net.runelite.api.Client;
@@ -40,7 +42,9 @@ public class GauntletLootOverlay extends Overlay
 	private BufferedImage closeButtonImage;
 	private BufferedImage closeButtonHoveredImage;
 	private final BufferedImage backgroundImage;
-	private final ArrayList<Pair<String, BufferedImage>> imageCache = new ArrayList<>();
+	private final Cache<String, BufferedImage> imageCache = CacheBuilder.newBuilder()
+		.maximumSize(10)
+		.build();
 
 	private Rectangle closeButtonBounds;
 	private final List<Pair<LootItem, Rectangle>> itemBounds = new ArrayList<>();
@@ -88,22 +92,21 @@ public class GauntletLootOverlay extends Overlay
 	@Nullable
 	private BufferedImage getImage(String imagePath)
 	{
-		BufferedImage image = imageCache.stream()
-			.filter(pair -> Objects.equals(pair.getKey(), imagePath))
-			.findFirst()
-			.map(Pair::getValue)
-			.orElse(null);
+		BufferedImage image;
+		try
+		{
+			image = imageCache.get(imagePath, () -> ImageUtil.loadImageResource(getClass(), imagePath));
+		} catch (ExecutionException ignored)
+		{
+			image = null;
+		}
 
 		if (image == null)
 		{
 			image = ImageUtil.loadImageResource(getClass(), imagePath);
 			if (image != null)
 			{
-				imageCache.add(Pair.of(imagePath, image));
-				if (imageCache.size() > 10)
-				{
-					imageCache.remove(0);
-				}
+				imageCache.put(imagePath, image);
 			}
 		}
 		return image;
@@ -286,6 +289,7 @@ public class GauntletLootOverlay extends Overlay
 
 	public void shutDown()
 	{
-		imageCache.clear();
+		imageCache.invalidateAll();
+		imageCache.cleanUp();
 	}
 }
