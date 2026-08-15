@@ -38,9 +38,6 @@ public class GauntletLootUtil
 		return "AEIOUaeiou".indexOf(c) != -1;
 	}
 
-	public static final int BACKGROUND_WIDTH = 250;
-	public static final int BACKGROUND_HEIGHT = 200;
-
 	public static final int CHEST_OFFSET = 7;
 	public static final int ITEM_START_X = 120;
 	public static final int ITEM_START_Y = 40;

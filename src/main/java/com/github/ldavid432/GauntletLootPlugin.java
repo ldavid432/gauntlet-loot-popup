@@ -110,6 +110,9 @@ public class GauntletLootPlugin extends Plugin
 	@Getter
 	private boolean isShowKillCountEnabled = false;
 
+	@Getter
+	private boolean isCustomBackgroundEnabled = false;
+
 	private ExecutorService executor = null;
 
 	@Override
@@ -218,7 +221,7 @@ public class GauntletLootPlugin extends Plugin
 				}
 				else if (Objects.equals(configChanged.getKey(), GauntletLootConfig.CUSTOM_BACKGROUND))
 				{
-					loot.setUseCustomBackground(config.isCustomChestBackgroundEnabled());
+					isCustomBackgroundEnabled = config.isCustomChestBackgroundEnabled();
 					overlay.clearBackgroundImage();
 				}
 			}

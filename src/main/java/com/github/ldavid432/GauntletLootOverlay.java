@@ -1,12 +1,10 @@
 package com.github.ldavid432;
 
-import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_HEIGHT;
-import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_WIDTH;
-import static com.github.ldavid432.GauntletLootUtil.IMAGE_CACHE_LIMIT;
-import static com.github.ldavid432.GauntletLootUtil.KC_FORMAT;
 import static com.github.ldavid432.GauntletLootUtil.CUSTOM_BACKGROUND_IMAGE;
+import static com.github.ldavid432.GauntletLootUtil.IMAGE_CACHE_LIMIT;
 import static com.github.ldavid432.GauntletLootUtil.ITEM_START_X;
 import static com.github.ldavid432.GauntletLootUtil.ITEM_START_Y;
+import static com.github.ldavid432.GauntletLootUtil.KC_FORMAT;
 import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import static com.github.ldavid432.GauntletLootUtil.rectangleFromImage;
 import com.github.ldavid432.loot.Loot;
@@ -21,20 +19,15 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import javax.annotation.Nullable;
-import javax.imageio.ImageIO;
-import javax.inject.Inject;
-import lombok.Value;
-import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import lombok.SneakyThrows;
+import lombok.Value;
 import net.runelite.api.Client;
 import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.game.ItemManager;
@@ -59,7 +52,7 @@ public class GauntletLootOverlay extends Overlay
 			new CacheLoader<>()
 			{
 				@Override
-				public BufferedImage load(@Nonnull String imagePath) throws Exception
+				public BufferedImage load(@Nonnull String imagePath)
 				{
 					return ImageUtil.loadImageResource(getClass(), imagePath);
 				}
@@ -93,7 +86,7 @@ public class GauntletLootOverlay extends Overlay
 		setBounds(getOverlayBounds(0, 0));
 	}
 
-	@SneakyThrows
+	@SneakyThrows(ExecutionException.class)
 	@Nullable
 	private BufferedImage getCloseButtonImage()
 	{
@@ -107,12 +100,12 @@ public class GauntletLootOverlay extends Overlay
 		}
 	}
 
-	@SneakyThrows
+	@SneakyThrows(ExecutionException.class)
 	@Nullable
 	private BufferedImage getBackgroundImage()
 	{
 		return imageCache.get("background", () -> {
-			if (plugin.getLoot().isUseCustomBackground())
+			if (plugin.isCustomBackgroundEnabled())
 			{
 				try
 				{
@@ -122,7 +115,7 @@ public class GauntletLootOverlay extends Overlay
 						return backgroundImage;
 					}
 				}
-				catch (IOException ignored)
+				catch (Exception ignored)
 				{
 				}
 			}
@@ -131,7 +124,7 @@ public class GauntletLootOverlay extends Overlay
 	}
 
 	// Originally based on https://github.com/lalochazia/missed-clues
-	@SneakyThrows
+	@SneakyThrows(ExecutionException.class)
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
@@ -146,7 +139,7 @@ public class GauntletLootOverlay extends Overlay
 		BufferedImage backgroundImage = getBackgroundImage();
 		if (backgroundImage != null)
 		{
-			setBounds(getOverlayBounds(BACKGROUND_WIDTH, BACKGROUND_HEIGHT));
+			setBounds(getOverlayBounds(backgroundImage.getWidth(), backgroundImage.getHeight()));
 			graphics.drawImage(backgroundImage, 0, 0, null);
 
 			LootImage lootImage = loot.getImage();
@@ -306,10 +299,11 @@ public class GauntletLootOverlay extends Overlay
 		// Default positon is centered-ish
 		if (getPreferredLocation() == null)
 		{
-			// Technically `(client.getCanvasWidth() - BACKGROUND_WIDTH) / 2` is more correctly centered but
+			BufferedImage backgroundImage = getBackgroundImage();
+			// Technically `(client.getCanvasWidth() - backgroundImage.getWidth()) / 2` is more correctly centered but
 			//  since the inventory is usually on the right we can do this to keep it more to the left
-			x = (client.getCanvasWidth() / 2) - BACKGROUND_WIDTH;
-			y = (client.getCanvasHeight() / 2) - BACKGROUND_HEIGHT;
+			x = (client.getCanvasWidth() / 2) - backgroundImage.getWidth();
+			y = (client.getCanvasHeight() / 2) - backgroundImage.getHeight();
 		}
 		else
 		{

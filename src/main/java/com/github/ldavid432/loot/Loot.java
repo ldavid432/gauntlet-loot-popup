@@ -12,7 +12,6 @@ import javax.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemStack;
 
@@ -35,9 +34,6 @@ public class Loot
 	@Nonnull
 	@Getter
 	private String title;
-	@Setter
-	@Getter
-	private boolean useCustomBackground;
 	@Getter
 	private int killCount;
 
@@ -76,7 +72,6 @@ public class Loot
 				.collect(Collectors.toList()),
 			source.getImage(config),
 			source.getTitle(config),
-			config.isCustomChestBackgroundEnabled(),
 			killCount
 		);
 	}
