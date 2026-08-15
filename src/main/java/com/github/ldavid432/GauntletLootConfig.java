@@ -15,6 +15,7 @@ public interface GauntletLootConfig extends Config
 	String CHEST_COLOR = "chestSpriteColor";
 	String CHEST_TITLE = "chestTitleText2";
 	String SHOW_KC = "showKillCount";
+	String CUSTOM_BACKGROUND = "customChestBackground";
 	int CURRENT_VERSION = 2;
 
 	@ConfigItem(
@@ -70,6 +71,20 @@ public interface GauntletLootConfig extends Config
 	void setChestTitleLegacy(GauntletTitle title);
 
 	@ConfigItem(
+		name = "Custom Chest Background",
+		description = "Enable custom chest background<br>" +
+			"Image should be placed at .runelite/gauntlet-chest-popup/background.png<br>" +
+			"The default size is 230px x 200px",
+		keyName = CUSTOM_BACKGROUND,
+		section = chestSection,
+		position = 1
+	)
+	default boolean isCustomChestBackgroundEnabled()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 		name = "Chest Title",
 		description = "Customize the title text<br>" +
 			"Gauntlet - Either 'The Gauntlet' or 'The Corrupted Gauntlet'<br>" +
@@ -77,7 +92,7 @@ public interface GauntletLootConfig extends Config
 			"Custom - Title set in 'Custom title' below ",
 		keyName = CHEST_TITLE,
 		section = chestSection,
-		position = 1
+		position = 2
 	)
 	default GauntletTitle2 getChestTitle2()
 	{
