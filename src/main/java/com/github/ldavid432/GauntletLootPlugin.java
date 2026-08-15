@@ -1,5 +1,7 @@
 package com.github.ldavid432;
 
+import static com.github.ldavid432.GauntletLootUtil.CUSTOM_BACKGROUND_IMAGE;
+import static com.github.ldavid432.GauntletLootUtil.PLUGIN_FOLDER;
 import static com.github.ldavid432.GauntletLootUtil.anyMenuEntry;
 import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import com.github.ldavid432.config.GauntletTitle;
@@ -15,9 +17,14 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.imageio.ImageIO;
+import javax.imageio.stream.FileImageOutputStream;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import lombok.Getter;
@@ -51,6 +58,7 @@ import net.runelite.client.plugins.loottracker.LootReceived;
 import net.runelite.client.ui.JagexColors;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ColorUtil;
+import net.runelite.client.util.ImageUtil;
 
 @Slf4j
 @PluginDescriptor(
@@ -87,12 +95,16 @@ public class GauntletLootPlugin extends Plugin
 	@Setter
 	private Loot loot = null;
 
+	private ExecutorService executor = null;
+
 	@Override
 	protected void startUp() throws Exception
 	{
 		overlayManager.add(overlay);
 		mouseManager.registerMouseListener(mouseListener);
 		client.getCanvas().addKeyListener(keyListener);
+
+		ensureCustomBackgroundExists();
 
 		if (config.getChestTitleLegacy() != GauntletTitle.UNSET)
 		{
@@ -131,6 +143,45 @@ public class GauntletLootPlugin extends Plugin
 		mouseManager.unregisterMouseListener(mouseListener);
 		overlay.shutDown();
 		overlayManager.remove(overlay);
+		if (executor != null)
+		{
+			executor.shutdownNow();
+			executor = null;
+		}
+	}
+
+	private void ensureCustomBackgroundExists()
+	{
+		boolean pluginFolderExists = PLUGIN_FOLDER.exists();
+
+		if (!pluginFolderExists || !CUSTOM_BACKGROUND_IMAGE.exists())
+		{
+			if (executor == null)
+			{
+				executor = Executors.newFixedThreadPool(1);
+			}
+			executor.submit(() -> {
+				if (!pluginFolderExists)
+				{
+					PLUGIN_FOLDER.mkdir();
+				}
+
+				BufferedImage defaultImage = ImageUtil.loadImageResource(GauntletLootPlugin.class, "background.png");
+
+				try
+				{
+					ImageIO.write(defaultImage, "png", new FileImageOutputStream(CUSTOM_BACKGROUND_IMAGE));
+				}
+				catch (Exception ignored)
+				{
+				}
+				finally
+				{
+					executor.shutdown();
+					executor = null;
+				}
+			});
+		}
 	}
 
 	@Subscribe
@@ -148,6 +199,11 @@ public class GauntletLootPlugin extends Plugin
 				{
 					loot.updateTitle(config);
 				}
+				else if (Objects.equals(configChanged.getKey(), GauntletLootConfig.CUSTOM_BACKGROUND))
+				{
+					loot.setUseCustomBackground(config.isCustomChestBackgroundEnabled());
+					overlay.clearBackgroundImage();
+				}
 			}
 		}
 	}
@@ -160,6 +216,7 @@ public class GauntletLootPlugin extends Plugin
 	private void clearLoot()
 	{
 		loot = null;
+		overlay.clearBackgroundImage();
 	}
 
 	@Subscribe

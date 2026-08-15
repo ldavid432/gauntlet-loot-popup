@@ -4,11 +4,13 @@ import com.github.ldavid432.loot.item.RareItem;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 import net.runelite.api.Client;
 import net.runelite.api.MenuEntry;
+import net.runelite.client.RuneLite;
 
 public class GauntletLootUtil
 {
@@ -31,9 +33,9 @@ public class GauntletLootUtil
 	public static final int BACKGROUND_WIDTH = 230;
 	public static final int BACKGROUND_HEIGHT = 200;
 
-	public static final int CHEST_WIDTH = 112;
-	public static final int CHEST_HEIGHT = 126;
 	public static final int CHEST_OFFSET = 7;
+	public static final int ITEM_START_X = 110;
+	public static final int ITEM_START_Y = 40;
 
 	public static final String HUNLLEF = "Crystalline Hunllef";
 	public static final String CORRUPTED_HUNLLEF = "Corrupted Hunllef";
@@ -52,5 +54,6 @@ public class GauntletLootUtil
 		RareItem.CRYSTAL_BLESSING
 	);
 
-
+	public static final File PLUGIN_FOLDER = new File(RuneLite.RUNELITE_DIR, "gauntlet-chest-popup");
+	public static final File CUSTOM_BACKGROUND_IMAGE = new File(PLUGIN_FOLDER, "background.png");
 }

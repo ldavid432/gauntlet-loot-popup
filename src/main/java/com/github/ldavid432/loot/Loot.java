@@ -10,8 +10,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemStack;
 
@@ -20,7 +21,7 @@ import net.runelite.client.game.ItemStack;
  * <p>
  * Image and title are decided upon loot being received in order to support things like random images
  */
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Loot
 {
 	@Nonnull
@@ -34,6 +35,9 @@ public class Loot
 	@Nonnull
 	@Getter
 	private String title;
+	@Setter
+	@Getter
+	private boolean useCustomBackground;
 
 	public void updateImage(GauntletLootConfig config)
 	{
@@ -69,7 +73,8 @@ public class Loot
 				})
 				.collect(Collectors.toList()),
 			source.getImage(config),
-			source.getTitle(config)
+			source.getTitle(config),
+			config.isCustomChestBackgroundEnabled()
 		);
 	}
 }

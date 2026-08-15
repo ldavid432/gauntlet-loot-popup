@@ -2,6 +2,9 @@ package com.github.ldavid432;
 
 import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_HEIGHT;
 import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_WIDTH;
+import static com.github.ldavid432.GauntletLootUtil.CUSTOM_BACKGROUND_IMAGE;
+import static com.github.ldavid432.GauntletLootUtil.ITEM_START_X;
+import static com.github.ldavid432.GauntletLootUtil.ITEM_START_Y;
 import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import static com.github.ldavid432.GauntletLootUtil.rectangleFromImage;
 import com.github.ldavid432.loot.image.LootImage;
@@ -14,11 +17,13 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.annotation.Nullable;
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import net.runelite.api.Client;
 import net.runelite.api.gameval.SpriteID;
@@ -41,7 +46,7 @@ public class GauntletLootOverlay extends Overlay
 
 	private BufferedImage closeButtonImage;
 	private BufferedImage closeButtonHoveredImage;
-	private final BufferedImage backgroundImage;
+	private BufferedImage backgroundImage;
 	private final Cache<String, BufferedImage> imageCache = CacheBuilder.newBuilder()
 		.maximumSize(10)
 		.build();
@@ -64,8 +69,6 @@ public class GauntletLootOverlay extends Overlay
 		setMovable(true);
 		// Start at the correct x and y so the overlay doesn't jump the first time it's opened
 		setBounds(getOverlayBounds(0, 0));
-
-		backgroundImage = ImageUtil.loadImageResource(getClass(), "background.png");
 	}
 
 	@Nullable
@@ -87,6 +90,31 @@ public class GauntletLootOverlay extends Overlay
 			}
 			return closeButtonImage;
 		}
+	}
+
+	@Nullable
+	private BufferedImage getBackgroundImage()
+	{
+		if (backgroundImage == null)
+		{
+			if (plugin.getLoot().isUseCustomBackground())
+			{
+				try
+				{
+					backgroundImage = ImageIO.read(CUSTOM_BACKGROUND_IMAGE);
+					if (backgroundImage != null)
+					{
+						return backgroundImage;
+					}
+				}
+				catch (IOException ignored)
+				{
+				}
+			}
+
+			backgroundImage = ImageUtil.loadImageResource(GauntletLootPlugin.class, "background.png");
+		}
+		return backgroundImage;
 	}
 
 	@Nullable
@@ -122,6 +150,7 @@ public class GauntletLootOverlay extends Overlay
 			return null;
 		}
 
+		BufferedImage backgroundImage = getBackgroundImage();
 		if (backgroundImage != null)
 		{
 			setBounds(getOverlayBounds(BACKGROUND_WIDTH, BACKGROUND_HEIGHT));
@@ -131,15 +160,15 @@ public class GauntletLootOverlay extends Overlay
 			BufferedImage image = getImage(lootImage.getPath());
 			if (image != null)
 			{
-				lootImage.renderImage(graphics, image);
+				lootImage.renderImage(graphics, image, backgroundImage.getHeight());
 			}
 
-			renderTitle(graphics);
+			renderTitle(graphics, backgroundImage);
 
 			final BufferedImage closeButtonImage = getCloseButtonImage();
 			if (closeButtonImage != null)
 			{
-				renderCloseButton(graphics, closeButtonImage);
+				renderCloseButton(graphics, closeButtonImage, backgroundImage);
 			}
 
 			renderItems(graphics, plugin.getLoot().getItems());
@@ -148,7 +177,7 @@ public class GauntletLootOverlay extends Overlay
 		return getBounds().getSize();
 	}
 
-	private void renderTitle(Graphics2D graphics)
+	private void renderTitle(Graphics2D graphics, BufferedImage backgroundImage)
 	{
 		String title = plugin.getLoot().getTitle();
 		graphics.setFont(FontManager.getRunescapeBoldFont());
@@ -167,7 +196,7 @@ public class GauntletLootOverlay extends Overlay
 		graphics.drawString(title, titleX, titleY);
 	}
 
-	private void renderCloseButton(Graphics2D graphics, BufferedImage closeButtonImage)
+	private void renderCloseButton(Graphics2D graphics, BufferedImage closeButtonImage, BufferedImage backgroundImage)
 	{
 		int closeX = backgroundImage.getWidth() - closeButtonImage.getWidth() - 8;
 		int closeY = 7;
@@ -183,10 +212,12 @@ public class GauntletLootOverlay extends Overlay
 
 	private void renderItems(Graphics2D graphics, List<LootItem> items)
 	{
-		int x = 110;
-		int y = 40;
+		int x = ITEM_START_X;
+		int y = ITEM_START_Y;
 
 		itemBounds.clear();
+
+		int furthestItemX = backgroundImage.getWidth() - 6;
 
 		for (int i = 0; i < items.size(); i++)
 		{
@@ -210,9 +241,11 @@ public class GauntletLootOverlay extends Overlay
 
 				itemBounds.add(Pair.of(item, rectangleFromImage(x, y, itemImage)));
 
-				if ((i + 1) % 3 == 0)
+				int nextItemX = x + (itemImage.getWidth() * 2);
+				if (nextItemX > furthestItemX)
 				{
-					x = x - (itemImage.getWidth() + 5) * 2;
+					// Drop to next line
+					x = ITEM_START_X;
 					y += itemImage.getHeight() + 5;
 				}
 				else
@@ -291,5 +324,13 @@ public class GauntletLootOverlay extends Overlay
 	{
 		imageCache.invalidateAll();
 		imageCache.cleanUp();
+		clearBackgroundImage();
+		closeButtonImage = null;
+		closeButtonHoveredImage = null;
+	}
+
+	public void clearBackgroundImage()
+	{
+		backgroundImage = null;
 	}
 }
