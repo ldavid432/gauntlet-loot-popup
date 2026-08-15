@@ -12,8 +12,9 @@ import static com.github.ldavid432.GauntletLootUtil.rectangleFromImage;
 import com.github.ldavid432.loot.Loot;
 import com.github.ldavid432.loot.image.LootImage;
 import com.github.ldavid432.loot.item.LootItem;
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -28,6 +29,12 @@ import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import lombok.Value;
+import java.util.Map;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.imageio.ImageIO;
+import javax.inject.Inject;
+import lombok.SneakyThrows;
 import net.runelite.api.Client;
 import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.game.ItemManager;
@@ -46,12 +53,18 @@ public class GauntletLootOverlay extends Overlay
 	private final ItemManager itemManager;
 	private final SpriteManager spriteManager;
 
-	private BufferedImage closeButtonImage;
-	private BufferedImage closeButtonHoveredImage;
-	private BufferedImage backgroundImage;
-	private final Cache<String, BufferedImage> imageCache = CacheBuilder.newBuilder()
+	private final LoadingCache<String, BufferedImage> imageCache = CacheBuilder.newBuilder()
 		.maximumSize(IMAGE_CACHE_LIMIT)
-		.build();
+		.build(
+			new CacheLoader<>()
+			{
+				@Override
+				public BufferedImage load(@Nonnull String imagePath) throws Exception
+				{
+					return ImageUtil.loadImageResource(getClass(), imagePath);
+				}
+			}
+		);
 
 	private Rectangle closeButtonBounds;
 	private final List<LootItemBounds> itemBounds = new ArrayList<>();
@@ -80,37 +93,30 @@ public class GauntletLootOverlay extends Overlay
 		setBounds(getOverlayBounds(0, 0));
 	}
 
+	@SneakyThrows
 	@Nullable
 	private BufferedImage getCloseButtonImage()
 	{
 		if (isInCloseButtonBounds(getMousePosition(client)))
 		{
-			if (closeButtonHoveredImage == null)
-			{
-				closeButtonHoveredImage = spriteManager.getSprite(SpriteID.SteelborderCloseButton._1, 0);
-			}
-			return closeButtonHoveredImage;
+			return imageCache.get("closeHovered", () -> spriteManager.getSprite(SpriteID.SteelborderCloseButton._1, 0));
 		}
 		else
 		{
-			if (closeButtonImage == null)
-			{
-				closeButtonImage = spriteManager.getSprite(SpriteID.SteelborderCloseButton._0, 0);
-			}
-			return closeButtonImage;
+			return imageCache.get("close", () -> spriteManager.getSprite(SpriteID.SteelborderCloseButton._0, 0));
 		}
 	}
 
+	@SneakyThrows
 	@Nullable
 	private BufferedImage getBackgroundImage()
 	{
-		if (backgroundImage == null)
-		{
+		return imageCache.get("background", () -> {
 			if (plugin.getLoot().isUseCustomBackground())
 			{
 				try
 				{
-					backgroundImage = ImageIO.read(CUSTOM_BACKGROUND_IMAGE);
+					BufferedImage backgroundImage = ImageIO.read(CUSTOM_BACKGROUND_IMAGE);
 					if (backgroundImage != null)
 					{
 						return backgroundImage;
@@ -120,36 +126,12 @@ public class GauntletLootOverlay extends Overlay
 				{
 				}
 			}
-
-			backgroundImage = ImageUtil.loadImageResource(GauntletLootPlugin.class, "background.png");
-		}
-		return backgroundImage;
-	}
-
-	@Nullable
-	private BufferedImage getImage(String imagePath)
-	{
-		BufferedImage image;
-		try
-		{
-			image = imageCache.get(imagePath, () -> ImageUtil.loadImageResource(getClass(), imagePath));
-		} catch (ExecutionException ignored)
-		{
-			image = null;
-		}
-
-		if (image == null)
-		{
-			image = ImageUtil.loadImageResource(getClass(), imagePath);
-			if (image != null)
-			{
-				imageCache.put(imagePath, image);
-			}
-		}
-		return image;
+			return ImageUtil.loadImageResource(GauntletLootPlugin.class, "background.png");
+		});
 	}
 
 	// Originally based on https://github.com/lalochazia/missed-clues
+	@SneakyThrows
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
@@ -168,7 +150,7 @@ public class GauntletLootOverlay extends Overlay
 			graphics.drawImage(backgroundImage, 0, 0, null);
 
 			LootImage lootImage = loot.getImage();
-			BufferedImage image = getImage(lootImage.getPath());
+			BufferedImage image = imageCache.get(lootImage.getPath());
 			if (image != null)
 			{
 				lootImage.renderImage(graphics, image, backgroundImage.getHeight());
@@ -183,7 +165,7 @@ public class GauntletLootOverlay extends Overlay
 				renderCloseButton(graphics, closeButtonImage, backgroundImage);
 			}
 
-			renderItems(graphics, loot.getItems());
+			renderItems(graphics, loot.getItems(), backgroundImage);
 		}
 
 		return getBounds().getSize();
@@ -229,7 +211,7 @@ public class GauntletLootOverlay extends Overlay
 		graphics.drawImage(closeButtonImage, closeX, closeY, null);
 	}
 
-	private void renderItems(Graphics2D graphics, List<LootItem> items)
+	private void renderItems(Graphics2D graphics, List<LootItem> items, BufferedImage backgroundImage)
 	{
 		int x = ITEM_START_X;
 		int y = ITEM_START_Y;
@@ -238,9 +220,8 @@ public class GauntletLootOverlay extends Overlay
 
 		int furthestItemX = backgroundImage.getWidth() - 6;
 
-		for (int i = 0; i < items.size(); i++)
+		for (LootItem item : items)
 		{
-			LootItem item = items.get(i);
 			int itemId = item.getId();
 			int quantity = item.getQuantity();
 
@@ -343,14 +324,10 @@ public class GauntletLootOverlay extends Overlay
 	{
 		resetBounds();
 		imageCache.invalidateAll();
-		imageCache.cleanUp();
-		clearBackgroundImage();
-		closeButtonImage = null;
-		closeButtonHoveredImage = null;
 	}
 
 	public void clearBackgroundImage()
 	{
-		backgroundImage = null;
+		imageCache.invalidate("background");
 	}
 }
