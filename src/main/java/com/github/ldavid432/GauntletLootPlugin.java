@@ -145,7 +145,11 @@ public class GauntletLootPlugin extends Plugin
 				chatMessageManager.queue(
 					QueuedMessage.builder()
 						.type(ChatMessageType.CONSOLE)
-						.runeLiteFormattedMessage(ColorUtil.wrapWithColorTag("Gauntlet Chest Popup has been updated! A custom background image can now be supplied", Color.RED))
+						.runeLiteFormattedMessage(
+							ColorUtil.wrapWithColorTag("Gauntlet Chest Popup has been updated!<br>", Color.RED) +
+								ColorUtil.wrapWithColorTag("* A custom background image can now be used<br>", Color.RED) +
+								ColorUtil.wrapWithColorTag("* Fixed issues when moving the popup", Color.RED)
+						)
 						.build()
 				);
 			}
