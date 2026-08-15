@@ -15,15 +15,23 @@
   - Show Kill Count: Shows your current kill count in the title (default: `false`)
 - Which items the rare item sound is played for
   - Weapon seed, Armour seed, Enhanced Weapon seed, Youngllef (Pet) and/or Elite scroll boxes
+- Chest Background
+  - The background image can be customized by turning on `Custom Chest Background`
+  - The image is located at:
+    - Windows: `%userprofile%\.runelite\gauntlet-chest-popup\background.png`
+    - Mac/Linux: `~/.runelite/gauntlet-chest-popup/background.png`
+  - By default, the image is 230px by 200px. You _can_ adjust the size, however not all UI elements may work properly with different size images
+  - After changing the image file you can toggle the `Custom Chest Background` or re-show the popup to refresh the image
+  - It must be a **PNG** file and named `background.png` - a default file will be automatically generated so prefer editing that one
 
-If you'd like to preview your customization you can run the command (type in chat) `::gauntletlootpreview`.
+If you'd like to preview your customization you can run the command (type in chat) `::gauntlet-chest`.
 This will bring up the popup with some fake loot.
-For a preview of the corrupted gauntlet do `::gauntletlootpreview corrupted`
+For a preview of the corrupted gauntlet do `::gauntlet-chest -c`
 
 ### Other Notes
 
 - Can be closed with the close icon, by pressing ESC or by clicking outside the popup (if that setting is enabled).
-- From my testing this *Should* be included in screenshots taken by the `Screenshots` plugin.
+- The popup *Should* be included in screenshots taken by the `Screenshots` plugin.
 - The popup position is moveable
   - Hold Alt (or whatever your Drag Hotkey is set to) and left-click drag to move
   - Hold Alt and right-click the popup to reset the position to default

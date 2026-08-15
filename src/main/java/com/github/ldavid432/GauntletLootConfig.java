@@ -74,7 +74,7 @@ public interface GauntletLootConfig extends Config
 		name = "Custom Chest Background",
 		description = "Enable custom chest background<br>" +
 			"Image should be placed at .runelite/gauntlet-chest-popup/background.png<br>" +
-			"The default size is 230px x 200px",
+			"See plugin support page for more details",
 		keyName = CUSTOM_BACKGROUND,
 		section = chestSection,
 		position = 1

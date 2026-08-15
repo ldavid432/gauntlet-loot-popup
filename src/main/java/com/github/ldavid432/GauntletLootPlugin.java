@@ -142,7 +142,7 @@ public class GauntletLootPlugin extends Plugin
 				chatMessageManager.queue(
 					QueuedMessage.builder()
 						.type(ChatMessageType.CONSOLE)
-						.runeLiteFormattedMessage(ColorUtil.wrapWithColorTag("Gauntlet Chest Popup has been updated! There is now an option to display your KC in the title.", Color.RED))
+						.runeLiteFormattedMessage(ColorUtil.wrapWithColorTag("Gauntlet Chest Popup has been updated! A custom background image can now be supplied", Color.RED))
 						.build()
 				);
 			}
@@ -246,12 +246,13 @@ public class GauntletLootPlugin extends Plugin
 	public void onCommandExecuted(CommandExecuted event)
 	{
 		// For debugging and previewing your theme
-		if (event.getCommand().equals("gauntletlootpreview"))
+		if (event.getCommand().equals("gauntletlootpreview") || event.getCommand().equals("gauntlet-chest"))
 		{
 			log.debug("Displaying Gauntlet loot preview");
 
 			LootSource source = LootSource.GAUNTLET;
-			if (event.getArguments().length >= 1 && event.getArguments()[0].equalsIgnoreCase("corrupted"))
+			if (event.getArguments().length >= 1 &&
+				(event.getArguments()[0].equalsIgnoreCase("corrupted") || event.getArguments()[0].equalsIgnoreCase("-c")))
 			{
 				source = LootSource.CORRUPTED_GAUNTLET;
 			}
