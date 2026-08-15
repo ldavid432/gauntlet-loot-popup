@@ -243,6 +243,7 @@ public class GauntletLootPlugin extends Plugin
 		loot = null;
 		lastKillCount = 0;
 		overlay.clearBackgroundImage();
+		overlay.resetBounds();
 	}
 
 	@Subscribe

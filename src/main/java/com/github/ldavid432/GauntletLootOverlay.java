@@ -61,6 +61,7 @@ public class GauntletLootOverlay extends Overlay
 
 	private Rectangle closeButtonBounds;
 	private final List<LootItemBounds> itemBounds = new ArrayList<>();
+	private boolean initialPositionApplied = false;
 
 	@Value
 	private static class LootItemBounds
@@ -82,8 +83,12 @@ public class GauntletLootOverlay extends Overlay
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
 		setPriority(200.0f);
 		setMovable(true);
-		// Start at the correct x and y so the overlay doesn't jump the first time it's opened
-		setBounds(getOverlayBounds(0, 0));
+
+		BufferedImage backgroundImage = getBackgroundImage();
+		if (backgroundImage != null)
+		{
+			setPreferredSize(new Dimension(backgroundImage.getWidth(), backgroundImage.getHeight()));
+		}
 	}
 
 	@SneakyThrows(ExecutionException.class)
@@ -132,36 +137,40 @@ public class GauntletLootOverlay extends Overlay
 
 		if (loot == null)
 		{
-			resetBounds();
 			return null;
 		}
 
 		BufferedImage backgroundImage = getBackgroundImage();
-		if (backgroundImage != null)
+		assert backgroundImage != null;
+
+		// lazily set preferred location once the canvas has a valid size
+		if (!initialPositionApplied && getPreferredLocation() == null)
 		{
-			setBounds(getOverlayBounds(backgroundImage.getWidth(), backgroundImage.getHeight()));
-			graphics.drawImage(backgroundImage, 0, 0, null);
-
-			LootImage lootImage = loot.getImage();
-			BufferedImage image = imageCache.get(lootImage.getPath());
-			if (image != null)
-			{
-				lootImage.renderImage(graphics, image, backgroundImage.getHeight());
-			}
-
-			final BufferedImage closeButtonImage = getCloseButtonImage();
-
-			renderTitle(graphics, loot.getTitle(), plugin.getLastKillCount(), closeButtonImage, backgroundImage);
-
-			if (closeButtonImage != null)
-			{
-				renderCloseButton(graphics, closeButtonImage, backgroundImage);
-			}
-
-			renderItems(graphics, loot.getItems(), backgroundImage);
+			setPreferredSettings(backgroundImage);
+			initialPositionApplied = true;
 		}
 
-		return getBounds().getSize();
+		graphics.drawImage(backgroundImage, 0, 0, null);
+
+		LootImage lootImage = loot.getImage();
+		BufferedImage image = imageCache.get(lootImage.getPath());
+		if (image != null)
+		{
+			lootImage.renderImage(graphics, image, backgroundImage.getHeight());
+		}
+
+		final BufferedImage closeButtonImage = getCloseButtonImage();
+
+		renderTitle(graphics, loot.getTitle(), plugin.getLastKillCount(), closeButtonImage, backgroundImage);
+
+		if (closeButtonImage != null)
+		{
+			renderCloseButton(graphics, closeButtonImage, backgroundImage);
+		}
+
+		renderItems(graphics, loot.getItems(), backgroundImage);
+
+		return new Dimension(backgroundImage.getWidth(), backgroundImage.getHeight());
 	}
 
 	private void renderTitle(Graphics2D graphics, String title, int killCount, BufferedImage closeButtonImage, BufferedImage backgroundImage)
@@ -249,9 +258,8 @@ public class GauntletLootOverlay extends Overlay
 		}
 	}
 
-	private void resetBounds()
+	public void resetBounds()
 	{
-		setBounds(getOverlayBounds(0, 0));
 		closeButtonBounds = null;
 		itemBounds.clear();
 	}
@@ -291,29 +299,6 @@ public class GauntletLootOverlay extends Overlay
 		);
 	}
 
-	private Rectangle getOverlayBounds(int width, int height)
-	{
-		int x;
-		int y;
-
-		// Default positon is centered-ish
-		if (getPreferredLocation() == null)
-		{
-			BufferedImage backgroundImage = getBackgroundImage();
-			// Technically `(client.getCanvasWidth() - backgroundImage.getWidth()) / 2` is more correctly centered but
-			//  since the inventory is usually on the right we can do this to keep it more to the left
-			x = (client.getCanvasWidth() / 2) - backgroundImage.getWidth();
-			y = (client.getCanvasHeight() / 2) - backgroundImage.getHeight();
-		}
-		else
-		{
-			x = getPreferredLocation().x;
-			y = getPreferredLocation().y;
-		}
-
-		return new Rectangle(x, y, width, height);
-	}
-
 	public void shutDown()
 	{
 		resetBounds();
@@ -323,5 +308,28 @@ public class GauntletLootOverlay extends Overlay
 	public void clearBackgroundImage()
 	{
 		imageCache.invalidate("background");
+	}
+
+	@Override
+	public void revalidate()
+	{
+		BufferedImage backgroundImage = getBackgroundImage();
+		if (backgroundImage != null && getPreferredLocation() == null)
+		{
+			setPreferredSettings(backgroundImage);
+		}
+	}
+
+	private void setPreferredSettings(BufferedImage backgroundImage)
+	{
+		setPreferredLocation(
+			// Technically `(client.getCanvasWidth() - backgroundImage.getWidth()) / 2` is more correctly centered but
+			//  since the inventory is usually on the right we can do this to keep it more to the left
+			new Point(
+				(client.getCanvasWidth() / 2) - backgroundImage.getWidth(),
+				(client.getCanvasHeight() / 2) - backgroundImage.getHeight()
+			)
+		);
+		setPreferredSize(new Dimension(backgroundImage.getWidth(), backgroundImage.getHeight()));
 	}
 }
