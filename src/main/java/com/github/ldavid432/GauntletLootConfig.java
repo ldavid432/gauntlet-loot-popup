@@ -15,7 +15,7 @@ public interface GauntletLootConfig extends Config
 	String CHEST_COLOR = "chestSpriteColor";
 	String CHEST_TITLE = "chestTitleText2";
 	String CUSTOM_BACKGROUND = "customChestBackground";
-	int CURRENT_VERSION = 1;
+	int CURRENT_VERSION = 2;
 
 	@ConfigItem(
 		name = "Click outside to dismiss",
@@ -73,7 +73,7 @@ public interface GauntletLootConfig extends Config
 		name = "Custom Chest Background",
 		description = "Enable custom chest background<br>" +
 			"Image should be placed at .runelite/gauntlet-chest-popup/background.png<br>" +
-			"The default size is 230px x 200px",
+			"See plugin support page for more details",
 		keyName = CUSTOM_BACKGROUND,
 		section = chestSection,
 		position = 1
