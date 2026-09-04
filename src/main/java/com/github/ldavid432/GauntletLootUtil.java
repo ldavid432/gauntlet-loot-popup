@@ -4,9 +4,8 @@ import com.github.ldavid432.loot.item.RareItem;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.io.File;
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -51,17 +50,14 @@ public class GauntletLootUtil
 		RareItem.YOUNGLLEF,
 		RareItem.ELITE_SCROLL_BOX,
 		RareItem.GAUNTLET_CAPE,
-		RareItem.CRYSTAL_SHARD
+		RareItem.CRYSTAL_SHARD,
+		// Leagues
+		RareItem.ECHO_ORB,
+		RareItem.CRYSTAL_BLESSING
 	);
 
 	public static final Pattern KC_PATTERN = Pattern.compile("Your (?:<col=[0-9a-f]{6}>)?(?:(?:Corrupted )?Gauntlet|Corrupted Hunllef \\(Echo\\))(?:</col>)? (?:kill|completion) count is: <col=[0-9a-f]{6}>([0-9,]+)</col>\\.?");
 	public static final NumberFormat KC_FORMAT = NumberFormat.getNumberInstance(Locale.UK);
-	@SafeVarargs
-	public static <T> List<T> staticListOf(List<T> list, T... items) {
-		List<T> newList = new ArrayList<>(list);
-		newList.addAll(List.of(items));
-		return newList;
-	}
 
 	public static final int IMAGE_CACHE_LIMIT = 10;
 	public static final File PLUGIN_FOLDER = new File(RuneLite.RUNELITE_DIR, "gauntlet-chest-popup");
