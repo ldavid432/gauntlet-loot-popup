@@ -157,6 +157,7 @@ public class GauntletLootPlugin extends Plugin
 		}
 
 		isShowKillCountEnabled = config.isShowKillCountEnabled();
+		isCustomBackgroundEnabled = config.isCustomChestBackgroundEnabled();
 	}
 
 	@Override
@@ -223,16 +224,16 @@ public class GauntletLootPlugin extends Plugin
 				{
 					loot.updateTitle(config);
 				}
-				else if (Objects.equals(configChanged.getKey(), GauntletLootConfig.CUSTOM_BACKGROUND))
-				{
-					isCustomBackgroundEnabled = config.isCustomChestBackgroundEnabled();
-					overlay.clearBackgroundImage();
-				}
 			}
 
 			if (Objects.equals(configChanged.getKey(), GauntletLootConfig.SHOW_KC))
 			{
 				isShowKillCountEnabled = config.isShowKillCountEnabled();
+			}
+			else if (Objects.equals(configChanged.getKey(), GauntletLootConfig.CUSTOM_BACKGROUND))
+			{
+				isCustomBackgroundEnabled = config.isCustomChestBackgroundEnabled();
+				overlay.clearBackgroundImage();
 			}
 		}
 	}

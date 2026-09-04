@@ -28,6 +28,7 @@ import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import lombok.SneakyThrows;
 import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.game.ItemManager;
@@ -39,6 +40,7 @@ import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.util.ImageUtil;
 
+@Slf4j
 public class GauntletLootOverlay extends Overlay
 {
 	private final GauntletLootPlugin plugin;
@@ -120,8 +122,9 @@ public class GauntletLootOverlay extends Overlay
 						return backgroundImage;
 					}
 				}
-				catch (Exception ignored)
+				catch (Exception e)
 				{
+					log.debug("Could not load custom background", e);
 				}
 			}
 			return ImageUtil.loadImageResource(GauntletLootPlugin.class, "background.png");
