@@ -89,6 +89,9 @@ public class GauntletLootPlugin extends Plugin
 	private ChatMessageManager chatMessageManager;
 
 	@Inject
+	private ConfigManager configManager;
+
+	@Inject
 	private GauntletLootOverlay overlay;
 
 	@Inject
@@ -103,8 +106,9 @@ public class GauntletLootPlugin extends Plugin
 	 * and show it in the UI without bothering to check which particular type of gauntlet it is.
 	 * <br>
 	 * The only time this causes an issue is if the user closes RL before opening the chest
+	 * <br>
+	 * As of later versions of gauntlet chest popup this is now just a backup as we now get the KC from the chat commands config if possible.
 	 */
-	@Getter
 	private int lastKillCount = 0;
 
 	@Getter
@@ -336,7 +340,14 @@ public class GauntletLootPlugin extends Plugin
 			.ifPresent(source -> {
 				log.debug("Displaying Gauntlet popup. Source: {}", source.getSourceName());
 
-				loot = Loot.of(source, lootItems, lastKillCount, config, itemManager, () -> {
+				// Get KC from chat commands plugin if possible
+				Integer kc = configManager.getRSProfileConfiguration("killcount", source.name().toLowerCase().replace("_", " "), Integer.class);
+				if (kc == null || kc < 0)
+				{
+					kc = lastKillCount;
+				}
+
+				loot = Loot.of(source, lootItems, kc, config, itemManager, () -> {
 					log.debug("Playing rare item sound for Gauntlet loot");
 					// Rare item sound
 					client.playSoundEffect(6765);
