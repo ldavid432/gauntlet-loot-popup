@@ -1,10 +1,19 @@
 package com.github.ldavid432;
 
+import static com.github.ldavid432.GauntletLootUtil.CLOSE_OFFSET_X;
+import static com.github.ldavid432.GauntletLootUtil.CLOSE_OFFSET_Y;
 import static com.github.ldavid432.GauntletLootUtil.CUSTOM_BACKGROUND_IMAGE;
+import static com.github.ldavid432.GauntletLootUtil.DEFAULT_CHEST_HEIGHT;
+import static com.github.ldavid432.GauntletLootUtil.DEFAULT_CHEST_WIDTH;
+import static com.github.ldavid432.GauntletLootUtil.DIVIDER_OFFSET_Y;
 import static com.github.ldavid432.GauntletLootUtil.IMAGE_CACHE_LIMIT;
+import static com.github.ldavid432.GauntletLootUtil.ITEM_LAST_OFFSET_X;
+import static com.github.ldavid432.GauntletLootUtil.ITEM_SPACING;
 import static com.github.ldavid432.GauntletLootUtil.ITEM_START_X;
 import static com.github.ldavid432.GauntletLootUtil.ITEM_START_Y;
 import static com.github.ldavid432.GauntletLootUtil.KC_FORMAT;
+import static com.github.ldavid432.GauntletLootUtil.MIN_SIZE;
+import static com.github.ldavid432.GauntletLootUtil.TITLE_OFFSET_Y;
 import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import static com.github.ldavid432.GauntletLootUtil.rectangleFromImage;
 import com.github.ldavid432.loot.Loot;
@@ -18,6 +27,8 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +84,8 @@ public class GauntletLootOverlay extends Overlay
 	}
 
 	@Inject
-	public GauntletLootOverlay(GauntletLootPlugin plugin, Client client, ItemManager itemManager, SpriteManager spriteManager)
+	public GauntletLootOverlay(GauntletLootPlugin plugin, Client client, ItemManager itemManager, SpriteManager spriteManager,
+							   GauntletLootConfig config)
 	{
 		super(plugin);
 		this.plugin = plugin;
@@ -85,12 +97,10 @@ public class GauntletLootOverlay extends Overlay
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
 		setPriority(200.0f);
 		setMovable(true);
+		setMinimumSize(MIN_SIZE);
+		setResizable(true);
 
-		BufferedImage backgroundImage = getBackgroundImage();
-		if (backgroundImage != null)
-		{
-			setPreferredSize(new Dimension(backgroundImage.getWidth(), backgroundImage.getHeight()));
-		}
+		setPreferredSize(config.isCustomChestBackgroundEnabled());
 	}
 
 	@SneakyThrows(ExecutionException.class)
@@ -112,22 +122,19 @@ public class GauntletLootOverlay extends Overlay
 	private BufferedImage getBackgroundImage()
 	{
 		return imageCache.get("background", () -> {
-			if (plugin.isCustomBackgroundEnabled())
+			try
 			{
-				try
+				BufferedImage backgroundImage = ImageIO.read(CUSTOM_BACKGROUND_IMAGE);
+				if (backgroundImage != null)
 				{
-					BufferedImage backgroundImage = ImageIO.read(CUSTOM_BACKGROUND_IMAGE);
-					if (backgroundImage != null)
-					{
-						return backgroundImage;
-					}
-				}
-				catch (Exception e)
-				{
-					log.debug("Could not load custom background", e);
+					return backgroundImage;
 				}
 			}
-			return ImageUtil.loadImageResource(GauntletLootPlugin.class, "background.png");
+			catch (Exception e)
+			{
+				log.debug("Could not load custom background", e);
+			}
+			return null;
 		});
 	}
 
@@ -143,40 +150,262 @@ public class GauntletLootOverlay extends Overlay
 			return null;
 		}
 
-		BufferedImage backgroundImage = getBackgroundImage();
-		assert backgroundImage != null;
+		BufferedImage backgroundImage = plugin.isCustomBackgroundEnabled() ? getBackgroundImage() : null;
 
 		// lazily set preferred location once the canvas has a valid size
 		if (!initialPositionApplied && getPreferredLocation() == null)
 		{
-			setPreferredSettings(backgroundImage);
+			setPreferredLocation();
+			setPreferredSize(plugin.isCustomBackgroundEnabled());
 			initialPositionApplied = true;
 		}
 
-		graphics.drawImage(backgroundImage, 0, 0, null);
+		renderBackground(graphics, backgroundImage);
 
 		LootImage lootImage = loot.getImage();
 		BufferedImage image = imageCache.get(lootImage.getPath());
 		if (image != null)
 		{
-			lootImage.renderImage(graphics, image, backgroundImage.getHeight());
+			lootImage.renderImage(graphics, image, getBounds().height);
 		}
 
 		final BufferedImage closeButtonImage = getCloseButtonImage();
 
-		renderTitle(graphics, loot.getTitle(), loot.getKillCount(), closeButtonImage, backgroundImage);
+		renderTitle(graphics, loot.getTitle(), loot.getKillCount(), closeButtonImage);
 
 		if (closeButtonImage != null)
 		{
-			renderCloseButton(graphics, closeButtonImage, backgroundImage);
+			renderCloseButton(graphics, closeButtonImage);
 		}
 
-		renderItems(graphics, loot.getItems(), backgroundImage);
+		renderItems(graphics, loot.getItems());
 
-		return new Dimension(backgroundImage.getWidth(), backgroundImage.getHeight());
+		return new Dimension(getBounds().width, getBounds().height);
 	}
 
-	private void renderTitle(Graphics2D graphics, String title, int killCount, BufferedImage closeButtonImage, BufferedImage backgroundImage)
+	// TODO: Break up this function
+	private void renderBackground(Graphics2D graphics, BufferedImage backgroundImage)
+	{
+		if (backgroundImage != null)
+		{
+			// Custom background image
+			graphics.drawImage(backgroundImage, 0, 0, null);
+		}
+		else
+		{
+			Shape originalClip = graphics.getClip();
+
+			// --Background--
+
+			graphics.setClip(
+				new Rectangle(
+					0,
+					0,
+					getBounds().width,
+					getBounds().height
+				)
+			);
+
+			BufferedImage bg = spriteManager.getSprite(SpriteID.TRADEBACKING, 0);
+			assert bg != null;
+
+			int x1 = 0;
+			int y1 = 0;
+
+			while (x1 < getBounds().width || y1 < getBounds().height)
+			{
+				if (x1 > getBounds().width)
+				{
+					x1 = 0;
+					y1 += bg.getHeight();
+				}
+				else if (y1 > getBounds().height)
+				{
+					break;
+				}
+				else
+				{
+					graphics.drawImage(bg, x1, y1, null);
+					x1 += bg.getWidth();
+				}
+			}
+
+			// --Frame--
+
+			// -Corners-
+			BufferedImage topLeft = spriteManager.getSprite(SpriteID.Steelborder.TOP_LEFT, 0);
+			assert topLeft != null;
+			graphics.drawImage(topLeft, 0, 0, null);
+
+			BufferedImage topRight = spriteManager.getSprite(SpriteID.Steelborder.TOP_RIGHT, 0);
+			assert topRight != null;
+			graphics.drawImage(topRight, getBounds().width - topRight.getWidth(), 0, null);
+
+			BufferedImage botLeft = spriteManager.getSprite(SpriteID.Steelborder.BOTTOM_LEFT, 0);
+			assert botLeft != null;
+			graphics.drawImage(botLeft, 0, getBounds().height - botLeft.getHeight(), null);
+
+			BufferedImage botRight = spriteManager.getSprite(SpriteID.Steelborder.BOTTOM_RIGHT, 0);
+			assert botRight != null;
+			graphics.drawImage(botRight, getBounds().width - botRight.getWidth(), getBounds().height - botRight.getHeight(), null);
+
+			// -Edges-
+			BufferedImage edge = spriteManager.getSprite(SpriteID.Steelborder2.EDGE_RIGHT, 0);
+			assert edge != null;
+
+			//  left edge
+
+			graphics.setClip(
+				new Rectangle(
+					0,
+					topLeft.getHeight(),
+					edge.getWidth(),
+					getBounds().height - topLeft.getHeight() - botLeft.getHeight()
+				)
+			);
+
+			int y = topLeft.getHeight();
+
+			while (y < getBounds().height - botLeft.getHeight())
+			{
+				drawRotated(graphics, edge, 0, y, 180);
+
+				y += edge.getHeight();
+			}
+
+			//  right edge
+
+			graphics.setClip(
+				new Rectangle(
+					getBounds().width - edge.getWidth(),
+					topRight.getHeight(),
+					edge.getWidth(),
+					getBounds().height - topRight.getHeight() - botRight.getHeight()
+				)
+			);
+
+			y = topRight.getHeight();
+
+			while (y < getBounds().height - botRight.getHeight())
+			{
+				drawRotated(graphics, edge, getBounds().width - edge.getWidth(), y, 0);
+
+				y += edge.getHeight();
+			}
+
+			//  top edge
+
+			graphics.setClip(
+				new Rectangle(
+					topLeft.getWidth(),
+					0,
+					getBounds().width - topLeft.getWidth() - topRight.getWidth(),
+					// Use width since the sprite is actually vertical
+					edge.getWidth()
+				)
+			);
+
+			int x = topLeft.getWidth();
+
+			while (x < getBounds().width - topRight.getWidth())
+			{
+				drawRotated(graphics, edge, x, 0, 270);
+
+				x += edge.getHeight();
+			}
+
+			//  bottom edge
+
+			graphics.setClip(
+				new Rectangle(
+					0,
+					getBounds().height - edge.getWidth(),
+					getBounds().width - botRight.getWidth(),
+					// Use width since the sprite is actually vertical
+					edge.getWidth()
+				)
+			);
+
+			x = botLeft.getWidth();
+
+			while (x < getBounds().width - topRight.getWidth())
+			{
+				drawRotated(graphics, edge, x, getBounds().height - edge.getWidth(), 90);
+
+				x += edge.getHeight();
+			}
+
+			//  divider
+			BufferedImage divider = spriteManager.getSprite(SpriteID.SteelborderDivider._0, 0);
+			assert divider != null;
+
+			graphics.setClip(
+				new Rectangle(
+					edge.getWidth(),
+					DIVIDER_OFFSET_Y,
+					getBounds().width - edge.getWidth() - edge.getWidth(),
+					// Use width since the sprite is actually vertical
+					edge.getWidth()
+				)
+			);
+
+			x = edge.getWidth();
+
+			while (x < getBounds().width - edge.getWidth())
+			{
+				drawRotated(graphics, divider, x, DIVIDER_OFFSET_Y, 0);
+
+				x += divider.getWidth();
+			}
+
+			// reset clip
+			graphics.setClip(originalClip);
+		}
+	}
+
+	// Draw an image rotated in a 90 degree increment
+	public static void drawRotated(Graphics2D graphics, BufferedImage img, int destX, int destY, int k) {
+		double theta;
+		double tx;
+		double ty;
+		int w = img.getWidth();
+		int h = img.getHeight();
+
+		switch (k) {
+			case 0: // 0 degrees
+				theta = 0;
+				tx = destX;
+				ty = destY;
+				break;
+			case 90: // +90° CCW
+				theta = Math.PI / 2.0;
+				// translate by +h in x so rotated top-left lands at destX,destY
+				tx = destX + h;
+				ty = destY;
+				break;
+			case 180: // 180°
+				theta = Math.PI;
+				// translate by +w,+h
+				tx = destX + w;
+				ty = destY + h;
+				break;
+			case 270: // -90° (or 270° CCW)
+				theta = -Math.PI / 2.0;
+				// translate by 0, +w
+				tx = destX;
+				ty = destY + w;
+				break;
+			default:
+				throw new AssertionError("unreachable");
+		}
+
+		AffineTransform rotate = AffineTransform.getRotateInstance(theta);
+		AffineTransform at = AffineTransform.getTranslateInstance(tx, ty);
+		at.concatenate(rotate); // final = Translate * Rotate
+		graphics.drawImage(img, at, null);
+	}
+
+	private void renderTitle(Graphics2D graphics, String title, int killCount, BufferedImage closeButtonImage)
 	{
 		boolean showKillCount = plugin.isShowKillCountEnabled() && killCount > 0;
 		if (showKillCount)
@@ -189,41 +418,39 @@ public class GauntletLootOverlay extends Overlay
 		// Measure
 		Rectangle titleBounds = graphics.getFontMetrics().getStringBounds(title, graphics).getBounds();
 		// Center on background when not showing KC, center on available space when showing KC
-		int titleAreaWidth = showKillCount ? (backgroundImage.getWidth() - closeButtonImage.getWidth()) / 2 : backgroundImage.getWidth() / 2;
+		int titleAreaWidth = showKillCount ? (getBounds().width - closeButtonImage.getWidth()) / 2 : getBounds().width / 2;
 		int titleX = titleAreaWidth - ((int) titleBounds.getWidth() / 2);
-		int titleY = 25;
 
 		// Draw shadow
 		graphics.setColor(Color.BLACK);
-		graphics.drawString(title, titleX + 1, titleY + 1);
+		graphics.drawString(title, titleX + 1, TITLE_OFFSET_Y + 1);
 
 		// Draw actual text
 		graphics.setColor(JagexColors.DARK_ORANGE_INTERFACE_TEXT);
-		graphics.drawString(title, titleX, titleY);
+		graphics.drawString(title, titleX, TITLE_OFFSET_Y);
 	}
 
-	private void renderCloseButton(Graphics2D graphics, BufferedImage closeButtonImage, BufferedImage backgroundImage)
+	private void renderCloseButton(Graphics2D graphics, BufferedImage closeButtonImage)
 	{
-		int closeX = backgroundImage.getWidth() - closeButtonImage.getWidth() - 8;
-		int closeY = 7;
+		int closeX = getBounds().width - closeButtonImage.getWidth() - CLOSE_OFFSET_X;
 
 		closeButtonBounds = rectangleFromImage(
 			closeX,
-			closeY,
+			CLOSE_OFFSET_Y,
 			closeButtonImage
 		);
 
-		graphics.drawImage(closeButtonImage, closeX, closeY, null);
+		graphics.drawImage(closeButtonImage, closeX, CLOSE_OFFSET_Y, null);
 	}
 
-	private void renderItems(Graphics2D graphics, List<LootItem> items, BufferedImage backgroundImage)
+	private void renderItems(Graphics2D graphics, List<LootItem> items)
 	{
 		int x = ITEM_START_X;
 		int y = ITEM_START_Y;
 
 		itemBounds.clear();
 
-		int furthestItemX = backgroundImage.getWidth() - 6;
+		int furthestItemX = getBounds().width - ITEM_LAST_OFFSET_X;
 
 		for (LootItem item : items)
 		{
@@ -251,11 +478,11 @@ public class GauntletLootOverlay extends Overlay
 				{
 					// Drop to next line
 					x = ITEM_START_X;
-					y += itemImage.getHeight() + 5;
+					y += itemImage.getHeight() + ITEM_SPACING;
 				}
 				else
 				{
-					x += itemImage.getWidth() + 5;
+					x += itemImage.getWidth() + ITEM_SPACING;
 				}
 			}
 		}
@@ -316,23 +543,52 @@ public class GauntletLootOverlay extends Overlay
 	@Override
 	public void revalidate()
 	{
-		BufferedImage backgroundImage = getBackgroundImage();
+		BufferedImage backgroundImage = plugin.isCustomBackgroundEnabled() ? getBackgroundImage() : null;
 		if (backgroundImage != null && getPreferredLocation() == null)
 		{
-			setPreferredSettings(backgroundImage);
+			setPreferredLocation();
+			setPreferredSize(plugin.isCustomBackgroundEnabled());
+		}
+		else
+		{
+			setPreferredLocation(
+				// Technically `(client.getCanvasWidth() - backgroundImage.getWidth()) / 2` is more correctly centered but
+				//  since the inventory is usually on the right we can do this to keep it more to the left
+				new Point(
+					(client.getCanvasWidth() / 2) - DEFAULT_CHEST_WIDTH,
+					(client.getCanvasHeight() / 2) - DEFAULT_CHEST_HEIGHT
+				)
+			);
+			setPreferredSize(new Dimension(DEFAULT_CHEST_WIDTH, DEFAULT_CHEST_HEIGHT));
 		}
 	}
 
-	private void setPreferredSettings(BufferedImage backgroundImage)
+	private void setPreferredLocation()
 	{
 		setPreferredLocation(
 			// Technically `(client.getCanvasWidth() - backgroundImage.getWidth()) / 2` is more correctly centered but
 			//  since the inventory is usually on the right we can do this to keep it more to the left
 			new Point(
-				(client.getCanvasWidth() / 2) - backgroundImage.getWidth(),
-				(client.getCanvasHeight() / 2) - backgroundImage.getHeight()
+				(client.getCanvasWidth() / 2) - getBounds().width,
+				(client.getCanvasHeight() / 2) - getBounds().width
 			)
 		);
-		setPreferredSize(new Dimension(backgroundImage.getWidth(), backgroundImage.getHeight()));
+	}
+
+	private void setPreferredSize(boolean isCustomBackgroundEnabled)
+	{
+		if (getPreferredSize() != null) return;
+
+		BufferedImage backgroundImage = isCustomBackgroundEnabled ? getBackgroundImage() : null;
+		if (backgroundImage != null)
+		{
+			setPreferredSize(new Dimension(backgroundImage.getWidth(), backgroundImage.getHeight()));
+			setResizable(false);
+		}
+		else
+		{
+			setPreferredSize(new Dimension(DEFAULT_CHEST_WIDTH, DEFAULT_CHEST_HEIGHT));
+			setResizable(true);
+		}
 	}
 }

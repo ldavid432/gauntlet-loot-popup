@@ -40,6 +40,17 @@ public class GauntletLootUtil
 	public static final int CHEST_OFFSET = 7;
 	public static final int ITEM_START_X = 120;
 	public static final int ITEM_START_Y = 40;
+	public static final int ITEM_LAST_OFFSET_X = 6;
+	public static final int ITEM_SPACING = 5;
+
+	public static final int DEFAULT_CHEST_WIDTH = 250;
+	public static final int DEFAULT_CHEST_HEIGHT = 200;
+	// Min size must be a square, but 200x200 still looks ok
+	public static final int MIN_SIZE = 200;
+	public static final int DIVIDER_OFFSET_Y = 30;
+	public static final int TITLE_OFFSET_Y = 25;
+	public static final int CLOSE_OFFSET_X = 8;
+	public static final int CLOSE_OFFSET_Y = 25;
 
 	public static final String HUNLLEF = "Crystalline Hunllef";
 	public static final String CORRUPTED_HUNLLEF = "Corrupted Hunllef";
