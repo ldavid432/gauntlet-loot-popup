@@ -183,7 +183,6 @@ public class GauntletLootOverlay extends Overlay
 		return new Dimension(getBounds().width, getBounds().height);
 	}
 
-	// TODO: Break up this function
 	private void renderBackground(Graphics2D graphics, BufferedImage backgroundImage)
 	{
 		if (backgroundImage != null)
@@ -193,173 +192,180 @@ public class GauntletLootOverlay extends Overlay
 		}
 		else
 		{
-			Shape originalClip = graphics.getClip();
+			renderSpriteBackground(graphics);
+		}
+	}
 
-			// --Background--
+	private void renderSpriteBackground(Graphics2D graphics)
+	{
+		Shape originalClip = graphics.getClip();
 
-			graphics.setClip(
-				new Rectangle(
-					0,
-					0,
-					getBounds().width,
-					getBounds().height
-				)
-			);
+		// --Background--
 
-			BufferedImage bg = spriteManager.getSprite(SpriteID.TRADEBACKING, 0);
-			assert bg != null;
+		renderBacking(graphics);
 
-			int x1 = 0;
-			int y1 = 0;
+		// --Frame--
 
-			while (x1 < getBounds().width || y1 < getBounds().height)
+		// -Corners-
+		BufferedImage topLeft = spriteManager.getSprite(SpriteID.Steelborder.TOP_LEFT, 0);
+		assert topLeft != null;
+		graphics.drawImage(topLeft, 0, 0, null);
+
+		BufferedImage topRight = spriteManager.getSprite(SpriteID.Steelborder.TOP_RIGHT, 0);
+		assert topRight != null;
+		graphics.drawImage(topRight, getBounds().width - topRight.getWidth(), 0, null);
+
+		BufferedImage botLeft = spriteManager.getSprite(SpriteID.Steelborder.BOTTOM_LEFT, 0);
+		assert botLeft != null;
+		graphics.drawImage(botLeft, 0, getBounds().height - botLeft.getHeight(), null);
+
+		BufferedImage botRight = spriteManager.getSprite(SpriteID.Steelborder.BOTTOM_RIGHT, 0);
+		assert botRight != null;
+		graphics.drawImage(botRight, getBounds().width - botRight.getWidth(), getBounds().height - botRight.getHeight(), null);
+
+		// -Edges-
+		BufferedImage edge = spriteManager.getSprite(SpriteID.Steelborder2.EDGE_RIGHT, 0);
+		assert edge != null;
+
+		renderBackgroundEdges(graphics, edge, topLeft, botLeft, topRight, botRight);
+
+		//  divider
+		BufferedImage divider = spriteManager.getSprite(SpriteID.SteelborderDivider._0, 0);
+		assert divider != null;
+
+		graphics.setClip(
+			new Rectangle(
+				edge.getWidth(),
+				DIVIDER_OFFSET_Y,
+				getBounds().width - edge.getWidth() - edge.getWidth(),
+				// Use width since the sprite is actually vertical
+				edge.getWidth()
+			)
+		);
+
+		for (int x = edge.getWidth();
+		     x < getBounds().width - edge.getWidth();
+		     x += divider.getWidth())
+		{
+			drawRotated(graphics, divider, x, DIVIDER_OFFSET_Y, 0);
+		}
+
+		// reset clip
+		graphics.setClip(originalClip);
+	}
+
+	private void renderBacking(Graphics2D graphics)
+	{
+		// TODO: setClip(getBounds)?
+		graphics.setClip(
+			new Rectangle(
+				0,
+				0,
+				getBounds().width,
+				getBounds().height
+			)
+		);
+
+		BufferedImage bg = spriteManager.getSprite(SpriteID.TRADEBACKING, 0);
+		assert bg != null;
+
+		int x1 = 0;
+		int y1 = 0;
+
+		while (x1 < getBounds().width || y1 < getBounds().height)
+		{
+			if (x1 > getBounds().width)
 			{
-				if (x1 > getBounds().width)
-				{
-					x1 = 0;
-					y1 += bg.getHeight();
-				}
-				else if (y1 > getBounds().height)
-				{
-					break;
-				}
-				else
-				{
-					graphics.drawImage(bg, x1, y1, null);
-					x1 += bg.getWidth();
-				}
+				x1 = 0;
+				y1 += bg.getHeight();
 			}
-
-			// --Frame--
-
-			// -Corners-
-			BufferedImage topLeft = spriteManager.getSprite(SpriteID.Steelborder.TOP_LEFT, 0);
-			assert topLeft != null;
-			graphics.drawImage(topLeft, 0, 0, null);
-
-			BufferedImage topRight = spriteManager.getSprite(SpriteID.Steelborder.TOP_RIGHT, 0);
-			assert topRight != null;
-			graphics.drawImage(topRight, getBounds().width - topRight.getWidth(), 0, null);
-
-			BufferedImage botLeft = spriteManager.getSprite(SpriteID.Steelborder.BOTTOM_LEFT, 0);
-			assert botLeft != null;
-			graphics.drawImage(botLeft, 0, getBounds().height - botLeft.getHeight(), null);
-
-			BufferedImage botRight = spriteManager.getSprite(SpriteID.Steelborder.BOTTOM_RIGHT, 0);
-			assert botRight != null;
-			graphics.drawImage(botRight, getBounds().width - botRight.getWidth(), getBounds().height - botRight.getHeight(), null);
-
-			// -Edges-
-			BufferedImage edge = spriteManager.getSprite(SpriteID.Steelborder2.EDGE_RIGHT, 0);
-			assert edge != null;
-
-			//  left edge
-
-			graphics.setClip(
-				new Rectangle(
-					0,
-					topLeft.getHeight(),
-					edge.getWidth(),
-					getBounds().height - topLeft.getHeight() - botLeft.getHeight()
-				)
-			);
-
-			int y = topLeft.getHeight();
-
-			while (y < getBounds().height - botLeft.getHeight())
+			else if (y1 > getBounds().height)
 			{
-				drawRotated(graphics, edge, 0, y, 180);
-
-				y += edge.getHeight();
+				break;
 			}
-
-			//  right edge
-
-			graphics.setClip(
-				new Rectangle(
-					getBounds().width - edge.getWidth(),
-					topRight.getHeight(),
-					edge.getWidth(),
-					getBounds().height - topRight.getHeight() - botRight.getHeight()
-				)
-			);
-
-			y = topRight.getHeight();
-
-			while (y < getBounds().height - botRight.getHeight())
+			else
 			{
-				drawRotated(graphics, edge, getBounds().width - edge.getWidth(), y, 0);
-
-				y += edge.getHeight();
+				graphics.drawImage(bg, x1, y1, null);
+				x1 += bg.getWidth();
 			}
+		}
+	}
 
-			//  top edge
+	private void renderBackgroundEdges(Graphics2D graphics, BufferedImage edge, BufferedImage topLeft,
+	                                   BufferedImage botLeft, BufferedImage topRight, BufferedImage botRight)
+	{
+		//  left edge
 
-			graphics.setClip(
-				new Rectangle(
-					topLeft.getWidth(),
-					0,
-					getBounds().width - topLeft.getWidth() - topRight.getWidth(),
-					// Use width since the sprite is actually vertical
-					edge.getWidth()
-				)
-			);
+		graphics.setClip(
+			new Rectangle(
+				0,
+				topLeft.getHeight(),
+				edge.getWidth(),
+				getBounds().height - topLeft.getHeight() - botLeft.getHeight()
+			)
+		);
 
-			int x = topLeft.getWidth();
+		for (int y = topLeft.getHeight();
+		     y < getBounds().height - botLeft.getHeight();
+		     y += edge.getHeight())
+		{
+			drawRotated(graphics, edge, 0, y, 180);
+		}
 
-			while (x < getBounds().width - topRight.getWidth())
-			{
-				drawRotated(graphics, edge, x, 0, 270);
+		//  right edge
 
-				x += edge.getHeight();
-			}
+		graphics.setClip(
+			new Rectangle(
+				getBounds().width - edge.getWidth(),
+				topRight.getHeight(),
+				edge.getWidth(),
+				getBounds().height - topRight.getHeight() - botRight.getHeight()
+			)
+		);
 
-			//  bottom edge
+		for (int y = topRight.getHeight();
+		     y < getBounds().height - botRight.getHeight();
+		     y += edge.getHeight())
+		{
+			drawRotated(graphics, edge, getBounds().width - edge.getWidth(), y, 0);
+		}
 
-			graphics.setClip(
-				new Rectangle(
-					0,
-					getBounds().height - edge.getWidth(),
-					getBounds().width - botRight.getWidth(),
-					// Use width since the sprite is actually vertical
-					edge.getWidth()
-				)
-			);
+		//  top edge
 
-			x = botLeft.getWidth();
+		graphics.setClip(
+			new Rectangle(
+				topLeft.getWidth(),
+				0,
+				getBounds().width - topLeft.getWidth() - topRight.getWidth(),
+				// Use width since the sprite is actually vertical
+				edge.getWidth()
+			)
+		);
 
-			while (x < getBounds().width - topRight.getWidth())
-			{
-				drawRotated(graphics, edge, x, getBounds().height - edge.getWidth(), 90);
+		for (int x = topLeft.getWidth();
+		     x < getBounds().width - topRight.getWidth();
+		     x += edge.getHeight())
+		{
+			drawRotated(graphics, edge, x, 0, 270);
+		}
 
-				x += edge.getHeight();
-			}
+		//  bottom edge
 
-			//  divider
-			BufferedImage divider = spriteManager.getSprite(SpriteID.SteelborderDivider._0, 0);
-			assert divider != null;
+		graphics.setClip(
+			new Rectangle(
+				0,
+				getBounds().height - edge.getWidth(),
+				getBounds().width - botRight.getWidth(),
+				// Use width since the sprite is actually vertical
+				edge.getWidth()
+			)
+		);
 
-			graphics.setClip(
-				new Rectangle(
-					edge.getWidth(),
-					DIVIDER_OFFSET_Y,
-					getBounds().width - edge.getWidth() - edge.getWidth(),
-					// Use width since the sprite is actually vertical
-					edge.getWidth()
-				)
-			);
-
-			x = edge.getWidth();
-
-			while (x < getBounds().width - edge.getWidth())
-			{
-				drawRotated(graphics, divider, x, DIVIDER_OFFSET_Y, 0);
-
-				x += divider.getWidth();
-			}
-
-			// reset clip
-			graphics.setClip(originalClip);
+		for (int x = botLeft.getWidth();
+		     x < getBounds().width - topRight.getWidth();
+		     x += edge.getHeight())
+		{
+			drawRotated(graphics, edge, x, getBounds().height - edge.getWidth(), 90);
 		}
 	}
 

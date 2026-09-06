@@ -50,7 +50,7 @@ public class GauntletLootUtil
 	public static final int DIVIDER_OFFSET_Y = 30;
 	public static final int TITLE_OFFSET_Y = 25;
 	public static final int CLOSE_OFFSET_X = 8;
-	public static final int CLOSE_OFFSET_Y = 25;
+	public static final int CLOSE_OFFSET_Y = 7;
 
 	public static final String HUNLLEF = "Crystalline Hunllef";
 	public static final String CORRUPTED_HUNLLEF = "Corrupted Hunllef";
