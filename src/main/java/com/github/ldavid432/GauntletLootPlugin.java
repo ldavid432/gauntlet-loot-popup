@@ -44,6 +44,7 @@ import net.runelite.api.events.CommandExecuted;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.MenuShouldLeftClick;
 import net.runelite.api.gameval.ItemID;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
@@ -57,6 +58,7 @@ import net.runelite.client.input.MouseListener;
 import net.runelite.client.input.MouseManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.plugins.loottracker.LootReceived;
 import net.runelite.client.ui.JagexColors;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -92,6 +94,12 @@ public class GauntletLootPlugin extends Plugin
 	private ConfigManager configManager;
 
 	@Inject
+	private ClientThread clientThread;
+
+	@Inject
+	private PluginManager pluginManager;
+
+	@Inject
 	private GauntletLootOverlay overlay;
 
 	@Inject
@@ -116,6 +124,9 @@ public class GauntletLootPlugin extends Plugin
 
 	@Getter
 	private boolean isCustomBackgroundEnabled = false;
+
+	@Getter
+	private boolean isResourcePacksIntegrationEnabled = true;
 
 	private ExecutorService executor = null;
 
@@ -162,6 +173,7 @@ public class GauntletLootPlugin extends Plugin
 
 		isShowKillCountEnabled = config.isShowKillCountEnabled();
 		isCustomBackgroundEnabled = config.isCustomChestBackgroundEnabled();
+		isResourcePacksIntegrationEnabled = config.isResourcePacksIntegrationEnabled();
 	}
 
 	@Override
@@ -234,11 +246,51 @@ public class GauntletLootPlugin extends Plugin
 			{
 				isShowKillCountEnabled = config.isShowKillCountEnabled();
 			}
+			if (Objects.equals(configChanged.getKey(), GauntletLootConfig.RESOURCE_PACKS))
+			{
+				isResourcePacksIntegrationEnabled = config.isResourcePacksIntegrationEnabled();
+				clientThread.invokeLater(() -> overlay.clearCache());
+			}
 			else if (Objects.equals(configChanged.getKey(), GauntletLootConfig.CUSTOM_BACKGROUND))
 			{
 				isCustomBackgroundEnabled = config.isCustomChestBackgroundEnabled();
 				overlay.clearBackgroundImage();
+				overlay.setPreferredSize(isCustomBackgroundEnabled);
+				overlay.setResizable(!isCustomBackgroundEnabled);
 			}
+		}
+		// Resource Packs enabled
+		else if (Objects.equals(configChanged.getGroup(), "runelite") && Objects.equals(configChanged.getKey(), "resourcepacksplugin")) {
+			boolean newValue = Boolean.parseBoolean(configChanged.getNewValue());
+
+			Plugin resourcePacksPlugin = pluginManager.getPlugins().stream()
+				.filter(plugin -> Objects.equals(plugin.getName(), "Resource packs"))
+				.findFirst()
+				.orElse(null);
+
+			if (resourcePacksPlugin == null)
+			{
+				return;
+			}
+
+			clientThread.invokeLater(() -> {
+				if (pluginManager.isPluginActive(resourcePacksPlugin) == newValue)
+				{
+					overlay.clearCache();
+					return false;
+				}
+				else
+				{
+					// Wait for plugin to startup since at this configChanged call it is not actually initialized
+					return pluginManager.isPluginActive(resourcePacksPlugin) == newValue;
+				}
+			});
+		}
+		// Resource pack changed
+		else if (Objects.equals(configChanged.getGroup(), "resourcepacks") &&
+			(Objects.equals(configChanged.getKey(), "selectedHubPack") || Objects.equals(configChanged.getKey(), "resourcePack")))
+		{
+			clientThread.invokeLater(() -> overlay.clearCache());
 		}
 	}
 
@@ -252,7 +304,7 @@ public class GauntletLootPlugin extends Plugin
 		loot = null;
 		lastKillCount = 0;
 		overlay.clearBackgroundImage();
-		overlay.resetBounds();
+		overlay.clearBounds();
 	}
 
 	@Subscribe
@@ -346,6 +398,9 @@ public class GauntletLootPlugin extends Plugin
 				{
 					kc = lastKillCount;
 				}
+
+				overlay.setPreferredSize(isCustomBackgroundEnabled);
+				if (overlay.getPreferredLocation() == null) overlay.setPreferredLocation();
 
 				loot = Loot.of(source, lootItems, kc, config, itemManager, () -> {
 					log.debug("Playing rare item sound for Gauntlet loot");

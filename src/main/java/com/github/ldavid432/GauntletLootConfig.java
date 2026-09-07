@@ -16,6 +16,7 @@ public interface GauntletLootConfig extends Config
 	String CHEST_TITLE = "chestTitleText2";
 	String SHOW_KC = "showKillCount";
 	String CUSTOM_BACKGROUND = "customChestBackground";
+	String RESOURCE_PACKS = "resourcePacksIntegration";
 	int CURRENT_VERSION = 3;
 
 	@ConfigItem(
@@ -129,6 +130,19 @@ public interface GauntletLootConfig extends Config
 	default boolean isShowKillCountEnabled()
 	{
 		return false;
+	}
+
+	@ConfigItem(
+		name = "Resource Packs Integration",
+		description = "Allows your resource pack from the resource packs plugin to modify the popup sprites<br>" +
+			"Requires <b>Custom Chest Background<b> to be disabled",
+		keyName = RESOURCE_PACKS,
+		section = chestSection,
+		position = 4
+	)
+	default boolean isResourcePacksIntegrationEnabled()
+	{
+		return true;
 	}
 
 	@ConfigSection(
