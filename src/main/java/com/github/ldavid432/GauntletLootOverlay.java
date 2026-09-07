@@ -91,6 +91,8 @@ public class GauntletLootOverlay extends Overlay
 			}
 		);
 
+	private Integer dividerY = null;
+
 	private Rectangle closeButtonBounds;
 	private final List<LootItemBounds> itemBounds = new ArrayList<>();
 
@@ -102,8 +104,7 @@ public class GauntletLootOverlay extends Overlay
 	}
 
 	@Inject
-	public GauntletLootOverlay(GauntletLootPlugin plugin, Client client, ItemManager itemManager, SpriteManager spriteManager,
-							   GauntletLootConfig config)
+	public GauntletLootOverlay(GauntletLootPlugin plugin, Client client, ItemManager itemManager, SpriteManager spriteManager)
 	{
 		super(plugin);
 		this.plugin = plugin;
@@ -189,6 +190,7 @@ public class GauntletLootOverlay extends Overlay
 
 		renderItems(graphics, loot.getItems());
 
+		// TODO: Can maybe just return getBounds() w + h ?
 		if (getPreferredSize() == null)
 		{
 			return getSize(backgroundImage);
@@ -216,6 +218,7 @@ public class GauntletLootOverlay extends Overlay
 		}
 	}
 
+	// TODO: Maybe get rid of all these asserts?
 	private void renderSpriteBackground(Graphics2D graphics) throws ExecutionException
 	{
 		Shape originalClip = graphics.getClip();
@@ -261,8 +264,10 @@ public class GauntletLootOverlay extends Overlay
 
 		// RuneLite seems to remove the transparent space around sprites while resource packs does not so we need to find
 		//  the top of the actual divider
-		// TODO: Cache this value
-		int dividerY = findFirstNonTransparentY(divider);
+		if (dividerY == null)
+		{
+			dividerY = findFirstNonTransparentY(divider);
+		}
 
 		graphics.setClip(
 			new Rectangle(
@@ -526,6 +531,7 @@ public class GauntletLootOverlay extends Overlay
 	public void clearCache()
 	{
 		imageCache.invalidateAll();
+		dividerY = null;
 	}
 
 	@Override

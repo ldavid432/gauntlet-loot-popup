@@ -277,7 +277,7 @@ public class GauntletLootPlugin extends Plugin
 				if (pluginManager.isPluginActive(resourcePacksPlugin) == newValue)
 				{
 					overlay.clearCache();
-					return false;
+					return true;
 				}
 				else
 				{
