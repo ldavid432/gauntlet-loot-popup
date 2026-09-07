@@ -17,7 +17,7 @@ public interface GauntletLootConfig extends Config
 	String SHOW_KC = "showKillCount";
 	String CUSTOM_BACKGROUND = "customChestBackground";
 	String RESOURCE_PACKS = "resourcePacksIntegration";
-	int CURRENT_VERSION = 3;
+	int CURRENT_VERSION = 4;
 
 	@ConfigItem(
 		name = "Click outside to dismiss",

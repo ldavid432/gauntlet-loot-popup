@@ -20,9 +20,13 @@
   - The image is located at:
     - Windows: `%userprofile%\.runelite\gauntlet-chest-popup\background.png`
     - Mac/Linux: `~/.runelite/gauntlet-chest-popup/background.png`
-  - By default, the image is 230px by 200px. You _can_ adjust the size, however not all UI elements may work properly with different size images
+  - By default, the image is 250px by 200px. You _can_ adjust the size if you want but, any smaller than 200x200 may cause issues.
   - After changing the image file you can toggle the `Custom Chest Background` or re-show the popup to refresh the image
   - It must be a **PNG** file and named `background.png` - a default file will be automatically generated so prefer editing that one
+- Resource packs integration
+  - The resource packs plugin can change the look of the popup
+  - Since it is based on the barrows chest UI, as long as your resource pack changes those sprites then it should work with the gauntlet chest popup too
+  - This can be turned off if you don't want your resource pack to change the look
 
 If you'd like to preview your customization you can run the command (type in chat) `::gauntlet-chest`.
 This will bring up the popup with some fake loot.
@@ -35,6 +39,7 @@ For a preview of the corrupted gauntlet do `::gauntlet-chest -c`
 - The popup position is moveable
   - Hold Alt (or whatever your Drag Hotkey is set to) and left-click drag to move
   - Hold Alt and right-click the popup to reset the position to default
+- The popup is resizable (unless you have a custom background enabled)
 
 ### Screenshots
 
