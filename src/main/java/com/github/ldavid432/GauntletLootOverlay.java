@@ -15,9 +15,9 @@ import static com.github.ldavid432.GauntletLootUtil.KC_FORMAT;
 import static com.github.ldavid432.GauntletLootUtil.MIN_SIZE;
 import static com.github.ldavid432.GauntletLootUtil.TITLE_OFFSET_Y;
 import static com.github.ldavid432.GauntletLootUtil.drawRotated;
-import static com.github.ldavid432.GauntletLootUtil.findFirstNonTransparentY;
 import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import static com.github.ldavid432.GauntletLootUtil.rectangleFromImage;
+import static com.github.ldavid432.GauntletLootUtil.trimTransparentBorder;
 import com.github.ldavid432.loot.Loot;
 import com.github.ldavid432.loot.image.LootImage;
 import com.github.ldavid432.loot.item.LootItem;
@@ -60,6 +60,14 @@ public class GauntletLootOverlay extends Overlay
 	private final ItemManager itemManager;
 	private final SpriteManager spriteManager;
 
+	// Wraps a cache or file image key and returns it without its transparent border
+	//  Handles resource packs not removing the transparent borders that sprites use while RuneLite does
+	@Value
+	private static class WithoutTransparentBorder
+	{
+		Object wrappedKey;
+	}
+
 	private final LoadingCache<Object, BufferedImage> imageCache = CacheBuilder.newBuilder()
 		.maximumSize(IMAGE_CACHE_LIMIT)
 		.build(
@@ -83,6 +91,10 @@ public class GauntletLootOverlay extends Overlay
 							return spriteManager.getSprite((Integer) key, 0);
 						}
 					}
+					else if (key instanceof WithoutTransparentBorder)
+					{
+						return trimTransparentBorder(load(((WithoutTransparentBorder) key).getWrappedKey()));
+					}
 					else
 					{
 						throw new IllegalArgumentException("Invalid image key");
@@ -91,10 +103,12 @@ public class GauntletLootOverlay extends Overlay
 			}
 		);
 
-	private Integer dividerY = null;
-
 	private Rectangle closeButtonBounds;
 	private final List<LootItemBounds> itemBounds = new ArrayList<>();
+
+	private static final Object closeButtonKey = new WithoutTransparentBorder(SpriteID.CloseButtons.BUTTON);
+	private static final Object closeButtonHoveredKey = new WithoutTransparentBorder(SpriteID.CloseButtons.HOVERED);
+	private static final Object dividerKey = new WithoutTransparentBorder(SpriteID.SteelborderDivider._0);
 
 	@Value
 	private static class LootItemBounds
@@ -126,12 +140,12 @@ public class GauntletLootOverlay extends Overlay
 		if (isInCloseButtonBounds(getMousePosition(client)))
 		{
 			// Hovered
-			return imageCache.get(SpriteID.SteelborderCloseButton._1);
+			return imageCache.get(closeButtonHoveredKey);
 		}
 		else
 		{
 			// Non-hovered
-			return imageCache.get(SpriteID.SteelborderCloseButton._0);
+			return imageCache.get(closeButtonKey);
 		}
 	}
 
@@ -259,22 +273,15 @@ public class GauntletLootOverlay extends Overlay
 
 	private void renderDivider(Graphics2D graphics) throws ExecutionException
 	{
-		BufferedImage divider = imageCache.get(SpriteID.SteelborderDivider._0);
+		BufferedImage divider = imageCache.get(dividerKey);
 		assert divider != null;
-
-		// RuneLite seems to remove the transparent space around sprites while resource packs does not so we need to find
-		//  the top of the actual divider
-		if (dividerY == null)
-		{
-			dividerY = findFirstNonTransparentY(divider);
-		}
 
 		graphics.setClip(
 			new Rectangle(
 				0,
-				DIVIDER_OFFSET_Y - dividerY,
+				DIVIDER_OFFSET_Y,
 				getBounds().width,
-				divider.getHeight() - dividerY
+				divider.getHeight()
 			)
 		);
 
@@ -282,7 +289,7 @@ public class GauntletLootOverlay extends Overlay
 		     x < getBounds().width;
 		     x += divider.getWidth())
 		{
-			drawRotated(graphics, divider, x, DIVIDER_OFFSET_Y - dividerY, 0);
+			drawRotated(graphics, divider, x, DIVIDER_OFFSET_Y, 0);
 		}
 	}
 
@@ -531,7 +538,6 @@ public class GauntletLootOverlay extends Overlay
 	public void clearCache()
 	{
 		imageCache.invalidateAll();
-		dividerY = null;
 	}
 
 	@Override
