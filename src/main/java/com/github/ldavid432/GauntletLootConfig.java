@@ -2,7 +2,6 @@ package com.github.ldavid432;
 
 import com.github.ldavid432.config.GauntletChestColor;
 import com.github.ldavid432.config.GauntletTitle;
-import com.github.ldavid432.config.GauntletTitle2;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -52,26 +51,6 @@ public interface GauntletLootConfig extends Config
 	}
 
 	@ConfigItem(
-		name = "Chest Title (legacy)",
-		description = "Customize the title text (legacy)",
-		keyName = "chestTitleText",
-		section = chestSection,
-		position = 1,
-		hidden = true
-	)
-	default GauntletTitle getChestTitleLegacy()
-	{
-		return GauntletTitle.UNSET;
-	}
-
-	@ConfigItem(
-		name = "",
-		description = "",
-		keyName = "chestTitleText"
-	)
-	void setChestTitleLegacy(GauntletTitle title);
-
-	@ConfigItem(
 		name = "Custom Chest Background",
 		description = "Enable custom chest background<br>" +
 			"Image should be placed at .runelite/gauntlet-chest-popup/background.png<br>" +
@@ -95,17 +74,10 @@ public interface GauntletLootConfig extends Config
 		section = chestSection,
 		position = 2
 	)
-	default GauntletTitle2 getChestTitle2()
+	default GauntletTitle getChestTitle()
 	{
-		return GauntletTitle2.GAUNTLET;
+		return GauntletTitle.GAUNTLET;
 	}
-
-	@ConfigItem(
-		name = "",
-		description = "",
-		keyName = CHEST_TITLE
-	)
-	void setChestTitle2(GauntletTitle2 title);
 
 	@ConfigItem(
 		name = "Custom title",
@@ -237,24 +209,5 @@ public interface GauntletLootConfig extends Config
 	{
 		return true;
 	}
-
-	@ConfigItem(
-		name = "",
-		description = "",
-		keyName = "lastSeenVersion",
-		hidden = true
-	)
-	default int getLastSeenVersion()
-	{
-		return -1;
-	}
-
-	@ConfigItem(
-		name = "",
-		description = "",
-		keyName = "lastSeenVersion",
-		hidden = true
-	)
-	void setLastSeenVersion(int version);
 
 }

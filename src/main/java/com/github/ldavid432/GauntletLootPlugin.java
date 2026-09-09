@@ -1,12 +1,12 @@
 package com.github.ldavid432;
 
-import static com.github.ldavid432.GauntletLootUtil.KC_PATTERN;
+import static com.github.ldavid432.GauntletLootConfig.CHEST_TITLE;
 import static com.github.ldavid432.GauntletLootUtil.CUSTOM_BACKGROUND_IMAGE;
+import static com.github.ldavid432.GauntletLootUtil.KC_PATTERN;
 import static com.github.ldavid432.GauntletLootUtil.PLUGIN_FOLDER;
 import static com.github.ldavid432.GauntletLootUtil.anyMenuEntry;
 import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import com.github.ldavid432.config.GauntletTitle;
-import com.github.ldavid432.config.GauntletTitle2;
 import com.github.ldavid432.loot.Loot;
 import com.github.ldavid432.loot.LootSource;
 import com.github.ldavid432.loot.item.LootItem;
@@ -22,9 +22,9 @@ import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.regex.Matcher;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.inject.Inject;
@@ -137,37 +137,34 @@ public class GauntletLootPlugin extends Plugin
 
 		ensureCustomBackgroundExists();
 
-		if (config.getChestTitleLegacy() != GauntletTitle.UNSET)
+		String legacyTitle = configManager.getConfiguration(GauntletLootConfig.GROUP, "chestTitleText");
+		if (legacyTitle != null)
 		{
 			// Migrate if custom
-			if (config.getChestTitleLegacy() == GauntletTitle.CUSTOM)
+			if (legacyTitle.equals("CUSTOM"))
 			{
-				config.setChestTitle2(GauntletTitle2.CUSTOM);
+				configManager.setConfiguration(GauntletLootConfig.GROUP, CHEST_TITLE, GauntletTitle.CUSTOM);
 			}
 
-			config.setChestTitleLegacy(GauntletTitle.UNSET);
+			configManager.unsetConfiguration(GauntletLootConfig.GROUP, "chestTitleText");
 		}
 
-		// Since last seen version wasn't in 1.0 checking for only it will trigger for everyone who installs the plugin.
-		//  By only triggering this during startup while not logged in we can "better" attempt to determine if this is a previous install or not.
-		//  Still not totally accurate but better than nothing.
-		if (config.getLastSeenVersion() < GauntletLootConfig.CURRENT_VERSION)
+		// will be null for new installs
+		Integer lastSeenVersion = configManager.getConfiguration(GauntletLootConfig.GROUP, "lastSeenVersion", Integer.class);
+		if (lastSeenVersion != null && lastSeenVersion < GauntletLootConfig.CURRENT_VERSION)
 		{
-			if (client.getGameState() != GameState.LOGGED_IN)
-			{
-				chatMessageManager.queue(
-					QueuedMessage.builder()
-						.type(ChatMessageType.CONSOLE)
-						.runeLiteFormattedMessage(
-							ColorUtil.wrapWithColorTag("Gauntlet Chest Popup has been updated!<br>", Color.RED) +
-								ColorUtil.wrapWithColorTag("* The popup is now resizable! (unless you have a custom background enabled)<br>", Color.RED) +
-								ColorUtil.wrapWithColorTag("* The Resource packs plugin can now change the look of the popup", Color.RED)
-						)
-						.build()
-				);
-			}
-			config.setLastSeenVersion(GauntletLootConfig.CURRENT_VERSION);
+			chatMessageManager.queue(
+				QueuedMessage.builder()
+					.type(ChatMessageType.CONSOLE)
+					.runeLiteFormattedMessage(
+						ColorUtil.wrapWithColorTag("Gauntlet Chest Popup has been updated!<br>", Color.RED) +
+							ColorUtil.wrapWithColorTag("* The popup is now resizable! (unless you have a custom background enabled)<br>", Color.RED) +
+							ColorUtil.wrapWithColorTag("* The Resource packs plugin can now change the look of the popup", Color.RED)
+					)
+					.build()
+			);
 		}
+		configManager.setConfiguration(GauntletLootConfig.GROUP, "lastSeenVersion", GauntletLootConfig.CURRENT_VERSION);
 
 		isShowKillCountEnabled = config.isShowKillCountEnabled();
 		isCustomBackgroundEnabled = config.isCustomChestBackgroundEnabled();
@@ -234,7 +231,7 @@ public class GauntletLootPlugin extends Plugin
 				{
 					loot.updateImage(config);
 				}
-				else if (Objects.equals(configChanged.getKey(), GauntletLootConfig.CHEST_TITLE))
+				else if (Objects.equals(configChanged.getKey(), CHEST_TITLE))
 				{
 					loot.updateTitle(config);
 				}

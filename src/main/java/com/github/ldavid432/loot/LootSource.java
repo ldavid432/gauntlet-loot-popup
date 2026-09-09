@@ -21,13 +21,13 @@ public enum LootSource
 {
 	GAUNTLET(
 		HUNLLEF,
-		config -> config.getChestTitle2().getText(config, HUNLLEF, "Gauntlet"),
+		config -> config.getChestTitle().getText(config, HUNLLEF, "Gauntlet"),
 		config -> new GauntletLootImage(config, GauntletChestColor.ORIGINAL),
 		GAUNTLET_ITEMS
 	),
 	CORRUPTED_GAUNTLET(
 		CORRUPTED_HUNLLEF,
-		config -> config.getChestTitle2().getText(config, CORRUPTED_HUNLLEF, "Corrupted Gauntlet"),
+		config -> config.getChestTitle().getText(config, CORRUPTED_HUNLLEF, "Corrupted Gauntlet"),
 		config -> new GauntletLootImage(config, GauntletChestColor.CORRUPTED),
 		GAUNTLET_ITEMS
 	),
