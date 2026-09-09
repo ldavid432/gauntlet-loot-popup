@@ -596,6 +596,8 @@ public class GauntletLootOverlay extends Overlay
 			Dimension size = getSize(backgroundImage);
 			setPreferredSize(size);
 			setResizable(backgroundImage == null);
+		} else {
+			setResizable(true);
 		}
 	}
 
