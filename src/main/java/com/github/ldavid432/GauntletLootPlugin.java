@@ -73,8 +73,6 @@ import net.runelite.client.util.ImageUtil;
 )
 public class GauntletLootPlugin extends Plugin
 {
-	private static final int MENU_EXAMINE_ID = -1_337_000;
-
 	@Inject
 	private Client client;
 
@@ -490,7 +488,6 @@ public class GauntletLootPlugin extends Plugin
 					.setTarget(ColorUtil.wrapWithColorTag(item.getItemName(), JagexColors.MENU_TARGET))
 					.setType(MenuAction.RUNELITE)
 					.setItemId(item.getId())
-					.setIdentifier(MENU_EXAMINE_ID)
 					.onClick(
 						entry -> {
 							log.debug("Examining Gauntlet popup item");
@@ -537,9 +534,16 @@ public class GauntletLootPlugin extends Plugin
 	public void onMenuShouldLeftClick(MenuShouldLeftClick event)
 	{
 		// Make the menu open on a left click when over an item
-		if (anyMenuEntry(client, entry -> entry.getIdentifier() == MENU_EXAMINE_ID))
+		if (isDisplayed() && !client.isMenuOpen())
 		{
-			event.setForceRightClick(true);
+			Point mousePos = getMousePosition(client);
+
+			LootItem item = overlay.getItemClicked(mousePos);
+
+			if (item != null)
+			{
+				event.setForceRightClick(true);
+			}
 		}
 	}
 
