@@ -6,6 +6,11 @@ import static com.github.ldavid432.GauntletLootUtil.CUSTOM_BACKGROUND_IMAGE;
 import static com.github.ldavid432.GauntletLootUtil.DEFAULT_CHEST_HEIGHT;
 import static com.github.ldavid432.GauntletLootUtil.DEFAULT_CHEST_WIDTH;
 import static com.github.ldavid432.GauntletLootUtil.DIVIDER_OFFSET_Y;
+import static com.github.ldavid432.GauntletLootUtil.EDGE_BOT;
+import static com.github.ldavid432.GauntletLootUtil.EDGE_IMAGE_THICKNESS;
+import static com.github.ldavid432.GauntletLootUtil.EDGE_LEFT;
+import static com.github.ldavid432.GauntletLootUtil.EDGE_RIGHT;
+import static com.github.ldavid432.GauntletLootUtil.EDGE_TOP;
 import static com.github.ldavid432.GauntletLootUtil.IMAGE_CACHE_LIMIT;
 import static com.github.ldavid432.GauntletLootUtil.ITEM_LAST_OFFSET_X;
 import static com.github.ldavid432.GauntletLootUtil.ITEM_SPACING;
@@ -14,7 +19,9 @@ import static com.github.ldavid432.GauntletLootUtil.ITEM_START_Y;
 import static com.github.ldavid432.GauntletLootUtil.KC_FORMAT;
 import static com.github.ldavid432.GauntletLootUtil.MIN_SIZE;
 import static com.github.ldavid432.GauntletLootUtil.TITLE_OFFSET_Y;
-import static com.github.ldavid432.GauntletLootUtil.drawRotated;
+import static com.github.ldavid432.GauntletLootUtil.CLOSE_BUTTON_HOVERED;
+import static com.github.ldavid432.GauntletLootUtil.CLOSE_BUTTON;
+import static com.github.ldavid432.GauntletLootUtil.DIVIDER;
 import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import static com.github.ldavid432.GauntletLootUtil.rectangleFromImage;
 import static com.github.ldavid432.GauntletLootUtil.trimTransparentBorder;
@@ -63,7 +70,7 @@ public class GauntletLootOverlay extends Overlay
 	// Wraps a cache or file image key and returns it without its transparent border
 	//  Handles resource packs not removing the transparent borders that sprites use while RuneLite does
 	@Value
-	private static class WithoutTransparentBorder
+	static class WithoutTransparentBorder
 	{
 		Object wrappedKey;
 	}
@@ -106,10 +113,6 @@ public class GauntletLootOverlay extends Overlay
 	private Rectangle closeButtonBounds;
 	private final List<LootItemBounds> itemBounds = new ArrayList<>();
 
-	private static final Object closeButtonKey = new WithoutTransparentBorder(SpriteID.CloseButtons.BUTTON);
-	private static final Object closeButtonHoveredKey = new WithoutTransparentBorder(SpriteID.CloseButtons.HOVERED);
-	private static final Object dividerKey = new WithoutTransparentBorder(SpriteID.SteelborderDivider._0);
-
 	@Value
 	private static class LootItemBounds
 	{
@@ -140,12 +143,12 @@ public class GauntletLootOverlay extends Overlay
 		if (isInCloseButtonBounds(getMousePosition(client)))
 		{
 			// Hovered
-			return imageCache.get(closeButtonHoveredKey);
+			return imageCache.get(CLOSE_BUTTON_HOVERED);
 		}
 		else
 		{
 			// Non-hovered
-			return imageCache.get(closeButtonKey);
+			return imageCache.get(CLOSE_BUTTON);
 		}
 	}
 
@@ -241,8 +244,6 @@ public class GauntletLootOverlay extends Overlay
 		renderBacking(graphics);
 
 		// Divider
-		BufferedImage edge = imageCache.get(SpriteID.Steelborder2.EDGE_RIGHT);
-		assert edge != null;
 		renderDivider(graphics);
 
 		// Corners
@@ -265,7 +266,7 @@ public class GauntletLootOverlay extends Overlay
 		graphics.drawImage(botRight, getBounds().width - botRight.getWidth(), getBounds().height - botRight.getHeight(), null);
 
 		// Edges
-		renderBackgroundEdges(graphics, edge, topLeft, botLeft, topRight, botRight);
+		renderBackgroundEdges(graphics, topLeft, botLeft, topRight, botRight);
 
 		// restore clip
 		graphics.setClip(originalClip);
@@ -273,7 +274,7 @@ public class GauntletLootOverlay extends Overlay
 
 	private void renderDivider(Graphics2D graphics) throws ExecutionException
 	{
-		BufferedImage divider = imageCache.get(dividerKey);
+		BufferedImage divider = imageCache.get(DIVIDER);
 		assert divider != null;
 
 		graphics.setClip(
@@ -281,7 +282,7 @@ public class GauntletLootOverlay extends Overlay
 				0,
 				DIVIDER_OFFSET_Y,
 				getBounds().width,
-				divider.getHeight()
+				EDGE_IMAGE_THICKNESS
 			)
 		);
 
@@ -289,7 +290,7 @@ public class GauntletLootOverlay extends Overlay
 		     x < getBounds().width;
 		     x += divider.getWidth())
 		{
-			drawRotated(graphics, divider, x, DIVIDER_OFFSET_Y, 0);
+			graphics.drawImage(divider, x, DIVIDER_OFFSET_Y, null);
 		}
 	}
 
@@ -322,81 +323,91 @@ public class GauntletLootOverlay extends Overlay
 		}
 	}
 
-	private void renderBackgroundEdges(Graphics2D graphics, BufferedImage edge, BufferedImage topLeft,
-	                                   BufferedImage botLeft, BufferedImage topRight, BufferedImage botRight)
+	private void renderBackgroundEdges(Graphics2D graphics, BufferedImage topLeft, BufferedImage botLeft,
+									   BufferedImage topRight, BufferedImage botRight) throws ExecutionException
 	{
-		//  left edge
+		// left edge
+
+		BufferedImage edgeLeft = imageCache.get(EDGE_LEFT);
+		assert edgeLeft != null;
 
 		graphics.setClip(
 			new Rectangle(
 				0,
 				topLeft.getHeight(),
-				edge.getWidth(),
+				EDGE_IMAGE_THICKNESS,
 				getBounds().height - topLeft.getHeight() - botLeft.getHeight()
 			)
 		);
 
 		for (int y = topLeft.getHeight();
 		     y < getBounds().height - botLeft.getHeight();
-		     y += edge.getHeight())
+		     y += edgeLeft.getHeight())
 		{
-			drawRotated(graphics, edge, 0, y, 180);
+			graphics.drawImage(edgeLeft, 0, y, null);
 		}
 
 		//  right edge
 
+		BufferedImage edgeRight = imageCache.get(EDGE_RIGHT);
+		assert edgeRight != null;
+
 		graphics.setClip(
 			new Rectangle(
-				getBounds().width - edge.getWidth(),
+				getBounds().width - 6,
 				topRight.getHeight(),
-				edge.getWidth(),
+				EDGE_IMAGE_THICKNESS,
 				getBounds().height - topRight.getHeight() - botRight.getHeight()
 			)
 		);
 
 		for (int y = topRight.getHeight();
 		     y < getBounds().height - botRight.getHeight();
-		     y += edge.getHeight())
+		     y += edgeRight.getHeight())
 		{
-			drawRotated(graphics, edge, getBounds().width - edge.getWidth(), y, 0);
+			graphics.drawImage(edgeRight, getBounds().width - EDGE_IMAGE_THICKNESS, y, null);
 		}
 
 		//  top edge
+
+		BufferedImage edgeTop = imageCache.get(EDGE_TOP);
+		assert edgeTop != null;
 
 		graphics.setClip(
 			new Rectangle(
 				topLeft.getWidth(),
 				0,
 				getBounds().width - topLeft.getWidth() - topRight.getWidth(),
-				// Use width since the sprite is actually vertical
-				edge.getWidth()
+				EDGE_IMAGE_THICKNESS
 			)
 		);
 
 		for (int x = topLeft.getWidth();
 		     x < getBounds().width - topRight.getWidth();
-		     x += edge.getHeight())
+		     x += edgeTop.getWidth())
 		{
-			drawRotated(graphics, edge, x, 0, 270);
+			graphics.drawImage(edgeTop, x, 0, null);
 		}
 
 		//  bottom edge
 
+		BufferedImage edgeBot = imageCache.get(EDGE_BOT);
+		assert edgeBot != null;
+
 		graphics.setClip(
 			new Rectangle(
 				0,
-				getBounds().height - edge.getWidth(),
+				getBounds().height - EDGE_IMAGE_THICKNESS,
 				getBounds().width - botRight.getWidth(),
-				// Use width since the sprite is actually vertical
-				edge.getWidth()
+				EDGE_IMAGE_THICKNESS
 			)
 		);
 
 		for (int x = botLeft.getWidth();
 		     x < getBounds().width - topRight.getWidth();
-		     x += edge.getHeight())
+		     x += edgeBot.getWidth())
 		{
-			drawRotated(graphics, edge, x, getBounds().height - edge.getWidth(), 90);
+			graphics.drawImage(edgeBot, x, getBounds().height - EDGE_IMAGE_THICKNESS, null);
 		}
 	}
 
