@@ -210,4 +210,35 @@ public interface GauntletLootConfig extends Config
 		return true;
 	}
 
+	@ConfigSection(
+		name = "Chat Message",
+		description = "Configure loot value chat message",
+		position = 4
+	)
+	String messageSection = "messageSection";
+
+	@ConfigItem(
+		name = "Send Chest Value Message",
+		description = "Send a chat message with the gauntlet chest value",
+		keyName = "showChatMessage",
+		section = messageSection,
+		position = 0
+	)
+	default boolean showChatMessage()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		name = "Use High Alchemy Value",
+		description = "Show high alchemy value instead of grand exchange value",
+		keyName = "chatMessageHighAlch",
+		section = messageSection,
+		position = 1
+	)
+	default boolean showHighAlchValue()
+	{
+		return false;
+	}
+
 }
