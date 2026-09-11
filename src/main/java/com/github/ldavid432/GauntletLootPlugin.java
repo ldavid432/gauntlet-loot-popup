@@ -187,7 +187,8 @@ public class GauntletLootPlugin extends Plugin
 					.runeLiteFormattedMessage(
 						ColorUtil.wrapWithColorTag("Gauntlet Chest Popup has been updated!<br>", Color.RED) +
 							ColorUtil.wrapWithColorTag("* The popup is now resizable! (unless you have a custom background enabled)<br>", Color.RED) +
-							ColorUtil.wrapWithColorTag("* The Resource packs plugin can now change the look of the popup", Color.RED)
+							ColorUtil.wrapWithColorTag("* The Resource packs plugin can now change the look of the popup", Color.RED) +
+							ColorUtil.wrapWithColorTag("* Added a config to enable a chest value chat message", Color.RED)
 					)
 					.build()
 			);

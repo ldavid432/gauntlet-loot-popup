@@ -27,6 +27,9 @@
   - The resource packs plugin can change the look of the popup
   - Since it is based on the barrows chest UI, as long as your resource pack changes those sprites then it should work with the gauntlet chest popup too
   - This can be turned off if you don't want your resource pack to change the look
+- Chest value chat message
+  - Turn on to get send a chat message with the value of the chest.
+  - By default, it uses the grand exchange value, but can be changed to High Alchemy value.
 
 If you'd like to preview your customization you can run the command (type in chat) `::gauntlet-chest`.
 This will bring up the popup with some fake loot.
