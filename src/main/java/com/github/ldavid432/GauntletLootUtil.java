@@ -126,7 +126,7 @@ public class GauntletLootUtil
 	public static final Pattern KC_PATTERN = Pattern.compile("Your (?:<col=[0-9a-f]{6}>)?(?:(?:Corrupted )?Gauntlet|Corrupted Hunllef \\(Echo\\))(?:</col>)? (?:kill|completion) count is: <col=[0-9a-f]{6}>([0-9,]+)</col>\\.?");
 	public static final NumberFormat KC_FORMAT = NumberFormat.getNumberInstance(Locale.UK);
 
-	public static final int IMAGE_CACHE_LIMIT = 10;
+	public static final int IMAGE_CACHE_LIMIT = 16;
 	public static final File PLUGIN_FOLDER = new File(RuneLite.RUNELITE_DIR, "gauntlet-chest-popup");
 	public static final File CUSTOM_BACKGROUND_IMAGE = new File(PLUGIN_FOLDER, "background.png");
 
