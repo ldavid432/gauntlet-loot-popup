@@ -233,9 +233,9 @@ public class GauntletLootPlugin extends Plugin
 
 				BufferedImage defaultImage = ImageUtil.loadImageResource(GauntletLootPlugin.class, "background.png");
 
-				try
+				try (FileImageOutputStream outputStream = new FileImageOutputStream(CUSTOM_BACKGROUND_IMAGE))
 				{
-					ImageIO.write(defaultImage, "png", new FileImageOutputStream(CUSTOM_BACKGROUND_IMAGE));
+					ImageIO.write(defaultImage, "png", outputStream);
 				}
 				catch (Exception ignored)
 				{
