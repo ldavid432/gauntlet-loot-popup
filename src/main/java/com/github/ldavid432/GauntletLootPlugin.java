@@ -26,9 +26,8 @@
 package com.github.ldavid432;
 
 import static com.github.ldavid432.GauntletLootConfig.CHEST_TITLE;
-import static com.github.ldavid432.GauntletLootUtil.CUSTOM_BACKGROUND_IMAGE;
+import static com.github.ldavid432.GauntletLootUtil.BACKGROUND_IMAGE_NAME;
 import static com.github.ldavid432.GauntletLootUtil.KC_PATTERN;
-import static com.github.ldavid432.GauntletLootUtil.PLUGIN_FOLDER;
 import static com.github.ldavid432.GauntletLootUtil.anyMenuEntry;
 import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import com.github.ldavid432.config.GauntletTitle;
@@ -44,6 +43,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
@@ -51,7 +52,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import javax.imageio.ImageIO;
-import javax.imageio.stream.FileImageOutputStream;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import lombok.Getter;
@@ -90,6 +90,7 @@ import net.runelite.client.plugins.loottracker.LootReceived;
 import net.runelite.client.ui.JagexColors;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ColorUtil;
+import net.runelite.client.util.Filepath;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.QuantityFormatter;
 
@@ -97,7 +98,9 @@ import net.runelite.client.util.QuantityFormatter;
 @PluginDescriptor(
 	name = "Gauntlet Chest Popup",
 	description = "Barrows chest style UI for the gauntlet chest!",
-	tags = {"gauntlet", "loot", "chest", "sound", "hunllef", "hunlef"}
+	tags = {"gauntlet", "loot", "chest", "sound", "hunllef", "hunlef"},
+	legacyDataDirectory = "gauntlet-chest-popup",
+	internalName = "gauntlet-chest-popup"
 )
 public class GauntletLootPlugin extends Plugin
 {
@@ -155,6 +158,11 @@ public class GauntletLootPlugin extends Plugin
 	private boolean isResourcePacksIntegrationEnabled = true;
 
 	private ExecutorService executor = null;
+
+	public Filepath getBackgroundImageFilepath() throws IOException
+	{
+		return getPluginDirectory().joinSegment(BACKGROUND_IMAGE_NAME);
+	}
 
 	@Override
 	protected void startUp() throws Exception
@@ -215,26 +223,26 @@ public class GauntletLootPlugin extends Plugin
 		}
 	}
 
-	private void ensureCustomBackgroundExists()
+	private void ensureCustomBackgroundExists() throws IOException
 	{
-		boolean pluginFolderExists = PLUGIN_FOLDER.exists();
+		boolean pluginFolderExists = getPluginDirectory().exists();
 
-		if (!pluginFolderExists || !CUSTOM_BACKGROUND_IMAGE.exists())
+		if (!pluginFolderExists || !getBackgroundImageFilepath().exists())
 		{
 			if (executor == null)
 			{
 				executor = Executors.newFixedThreadPool(1);
 			}
 			executor.submit(() -> {
-				if (!pluginFolderExists)
+				try (OutputStream outputStream = getBackgroundImageFilepath().openOutputStream())
 				{
-					PLUGIN_FOLDER.mkdir();
-				}
+					if (!pluginFolderExists)
+					{
+						getPluginDirectory().createDirectory();
+					}
 
-				BufferedImage defaultImage = ImageUtil.loadImageResource(GauntletLootPlugin.class, "background.png");
+					BufferedImage defaultImage = ImageUtil.loadImageResource(GauntletLootPlugin.class, BACKGROUND_IMAGE_NAME);
 
-				try (FileImageOutputStream outputStream = new FileImageOutputStream(CUSTOM_BACKGROUND_IMAGE))
-				{
 					ImageIO.write(defaultImage, "png", outputStream);
 				}
 				catch (Exception ignored)

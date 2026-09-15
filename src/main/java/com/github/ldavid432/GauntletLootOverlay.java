@@ -1,10 +1,12 @@
 package com.github.ldavid432;
 
+import static com.github.ldavid432.GauntletLootUtil.CLOSE_BUTTON;
+import static com.github.ldavid432.GauntletLootUtil.CLOSE_BUTTON_HOVERED;
 import static com.github.ldavid432.GauntletLootUtil.CLOSE_OFFSET_X;
 import static com.github.ldavid432.GauntletLootUtil.CLOSE_OFFSET_Y;
-import static com.github.ldavid432.GauntletLootUtil.CUSTOM_BACKGROUND_IMAGE;
 import static com.github.ldavid432.GauntletLootUtil.DEFAULT_CHEST_HEIGHT;
 import static com.github.ldavid432.GauntletLootUtil.DEFAULT_CHEST_WIDTH;
+import static com.github.ldavid432.GauntletLootUtil.DIVIDER;
 import static com.github.ldavid432.GauntletLootUtil.DIVIDER_OFFSET_Y;
 import static com.github.ldavid432.GauntletLootUtil.EDGE_BOT;
 import static com.github.ldavid432.GauntletLootUtil.EDGE_IMAGE_THICKNESS;
@@ -19,9 +21,6 @@ import static com.github.ldavid432.GauntletLootUtil.ITEM_START_Y;
 import static com.github.ldavid432.GauntletLootUtil.KC_FORMAT;
 import static com.github.ldavid432.GauntletLootUtil.MIN_SIZE;
 import static com.github.ldavid432.GauntletLootUtil.TITLE_OFFSET_Y;
-import static com.github.ldavid432.GauntletLootUtil.CLOSE_BUTTON_HOVERED;
-import static com.github.ldavid432.GauntletLootUtil.CLOSE_BUTTON;
-import static com.github.ldavid432.GauntletLootUtil.DIVIDER;
 import static com.github.ldavid432.GauntletLootUtil.getMousePosition;
 import static com.github.ldavid432.GauntletLootUtil.rectangleFromImage;
 import static com.github.ldavid432.GauntletLootUtil.trimTransparentBorder;
@@ -38,6 +37,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -157,9 +157,9 @@ public class GauntletLootOverlay extends Overlay
 	private BufferedImage getBackgroundImage()
 	{
 		return imageCache.get("background", () -> {
-			try
+			try(InputStream inputStream = plugin.getBackgroundImageFilepath().openInputStream())
 			{
-				BufferedImage backgroundImage = ImageIO.read(CUSTOM_BACKGROUND_IMAGE);
+				BufferedImage backgroundImage = ImageIO.read(inputStream);
 				if (backgroundImage != null)
 				{
 					return backgroundImage;

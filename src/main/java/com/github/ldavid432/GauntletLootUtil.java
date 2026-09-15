@@ -7,7 +7,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
-import java.io.File;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.List;
@@ -17,7 +16,6 @@ import java.util.regex.Pattern;
 import net.runelite.api.Client;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.gameval.SpriteID;
-import net.runelite.client.RuneLite;
 
 public class GauntletLootUtil
 {
@@ -127,8 +125,7 @@ public class GauntletLootUtil
 	public static final NumberFormat KC_FORMAT = NumberFormat.getNumberInstance(Locale.UK);
 
 	public static final int IMAGE_CACHE_LIMIT = 16;
-	public static final File PLUGIN_FOLDER = new File(RuneLite.RUNELITE_DIR, "gauntlet-chest-popup");
-	public static final File CUSTOM_BACKGROUND_IMAGE = new File(PLUGIN_FOLDER, "background.png");
+	public static final String BACKGROUND_IMAGE_NAME = "background.png";
 
 	// Have to hard-code the thickness in order to match the real barrows UI with some resource packs
 	public static final int EDGE_IMAGE_THICKNESS = 6;
