@@ -3,6 +3,8 @@
 - Displays a barrows chest style UI when you loot the Gauntlet chest!
 - Plays a sounds when you get a rare item
 
+![image](/readme_pic.png)
+
 ## Customization
 
 - Chest sprite color
@@ -35,19 +37,16 @@ If you'd like to preview your customization you can run the command (type in cha
 This will bring up the popup with some fake loot.
 For a preview of the corrupted gauntlet do `::gauntlet-chest -c`
 
-### Other Notes
-
-- Can be closed with the close icon, by pressing ESC or by clicking outside the popup (if that setting is enabled).
-- The popup *Should* be included in screenshots taken by the `Screenshots` plugin.
-- The popup position is moveable
-  - Hold Alt (or whatever your Drag Hotkey is set to) and left-click drag to move
-  - Hold Alt and right-click the popup to reset the position to default
-- The popup is resizable (unless you have a custom background enabled)
-
-### Screenshots
-
-![image](/readme_pic.png)
-
 Example of customization:
 
 ![image](/readme_pic_2.png)
+
+### Other Notes
+
+- Can be closed with the close icon, by pressing ESC or by clicking outside the popup (if that setting is enabled).
+- The popup *should* be included in screenshots taken by the `Screenshots` plugin.
+- The popup position is moveable
+  - Hold `Alt` (or whatever your Drag Hotkey is set to) and left-click drag to move
+  - Hold `Alt` and right-click the popup to reset the position to default
+- The popup is resizable (unless you have a custom background enabled)
+  - Hold `Alt` and drag the corners or edges to resize
