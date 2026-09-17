@@ -20,8 +20,8 @@
 - Chest Background
   - The background image can be customized by turning on `Custom Chest Background`
   - The image is located at:
-    - Windows: `%userprofile%\.runelite\gauntlet-chest-popup\background.png`
-    - Mac/Linux: `~/.runelite/gauntlet-chest-popup/background.png`
+    - Windows: `%userprofile%\.runelite\plugin-data\gauntlet-chest-popup\background.png`
+    - Mac/Linux: `~/.runelite/plugin-data/gauntlet-chest-popup/background.png`
   - By default, the image is 250px by 200px. You _can_ adjust the size if you want but, any smaller than 200x200 may cause issues.
   - After changing the image file you can toggle the `Custom Chest Background` or re-show the popup to refresh the image
   - It must be a **PNG** file and named `background.png` - a default file will be automatically generated so prefer editing that one
