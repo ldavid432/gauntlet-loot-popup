@@ -442,33 +442,38 @@ public class GauntletLootPlugin extends Plugin
 
 				if (config.showChatMessage())
 				{
-					lootItems.stream()
-						.map(stack -> {
-							if (config.showHighAlchValue())
-							{
-								return itemManager.getItemComposition(stack.getId()).getHaPrice() * stack.getQuantity();
-							}
-							else
-							{
-								return itemManager.getItemPrice(stack.getId()) * stack.getQuantity();
-							}
-						})
-						.reduce(Integer::sum)
-						.ifPresent(sum -> {
-							// Message structure copied from RuneLite BarrowsPlugin.java
-							final ChatMessageBuilder message = new ChatMessageBuilder()
-								.append(ChatColorType.HIGHLIGHT)
-								.append("Your chest is worth around ")
-								.append(QuantityFormatter.formatNumber(sum))
-								.append(" coins.")
-								.append(ChatColorType.NORMAL);
-
-							chatMessageManager.queue(QueuedMessage.builder()
-								.type(ChatMessageType.ITEM_EXAMINE)
-								.runeLiteFormattedMessage(message.build())
-								.build());
-						});
+					sendChatMessage(lootItems);
 				}
+			});
+	}
+	
+	private void sendChatMessage(Collection<ItemStack> lootItems)
+	{
+		lootItems.stream()
+			.map(stack -> {
+				if (config.showHighAlchValue())
+				{
+					return itemManager.getItemComposition(stack.getId()).getHaPrice() * stack.getQuantity();
+				}
+				else
+				{
+					return itemManager.getItemPrice(stack.getId()) * stack.getQuantity();
+				}
+			})
+			.reduce(Integer::sum)
+			.ifPresent(sum -> {
+				// Message structure copied from RuneLite BarrowsPlugin.java
+				final ChatMessageBuilder message = new ChatMessageBuilder()
+					.append(ChatColorType.HIGHLIGHT)
+					.append("Your chest is worth around ")
+					.append(QuantityFormatter.formatNumber(sum))
+					.append(" coins.")
+					.append(ChatColorType.NORMAL);
+
+				chatMessageManager.queue(QueuedMessage.builder()
+					.type(ChatMessageType.ITEM_EXAMINE)
+					.runeLiteFormattedMessage(message.build())
+					.build());
 			});
 	}
 
