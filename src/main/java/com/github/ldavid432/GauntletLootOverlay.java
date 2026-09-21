@@ -157,7 +157,7 @@ public class GauntletLootOverlay extends Overlay
 	private BufferedImage getBackgroundImage()
 	{
 		return imageCache.get("background", () -> {
-			try(InputStream inputStream = plugin.getBackgroundImageFilepath().openInputStream())
+			try (InputStream inputStream = plugin.getBackgroundImageFilepath().openInputStream())
 			{
 				BufferedImage backgroundImage = ImageIO.read(inputStream);
 				if (backgroundImage != null)
@@ -324,7 +324,7 @@ public class GauntletLootOverlay extends Overlay
 	}
 
 	private void renderBackgroundEdges(Graphics2D graphics, BufferedImage topLeft, BufferedImage botLeft,
-									   BufferedImage topRight, BufferedImage botRight) throws ExecutionException
+	                                   BufferedImage topRight, BufferedImage botRight) throws ExecutionException
 	{
 		// left edge
 
@@ -554,7 +554,10 @@ public class GauntletLootOverlay extends Overlay
 	@Override
 	public void revalidate()
 	{
-		if (getPreferredLocation() != null) return;
+		if (getPreferredLocation() != null)
+		{
+			return;
+		}
 
 		// called after Overlay.reset() is called
 
@@ -591,12 +594,15 @@ public class GauntletLootOverlay extends Overlay
 
 	public void setPreferredSize(boolean isCustomBackgroundEnabled)
 	{
-		if (getPreferredSize() == null || isCustomBackgroundEnabled) {
+		if (getPreferredSize() == null || isCustomBackgroundEnabled)
+		{
 			BufferedImage backgroundImage = isCustomBackgroundEnabled ? getBackgroundImage() : null;
 			Dimension size = getSize(backgroundImage);
 			setPreferredSize(size);
 			setResizable(backgroundImage == null);
-		} else {
+		}
+		else
+		{
 			setResizable(true);
 		}
 	}

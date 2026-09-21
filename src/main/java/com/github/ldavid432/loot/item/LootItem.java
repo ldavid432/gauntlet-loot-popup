@@ -25,7 +25,8 @@ public class LootItem
 		return new LootItem(item.getItemId(), item.getExamineText(), quantity, itemName);
 	}
 
-	public static LootItem fromBasicItem(int itemId, int quantity, String itemName){
+	public static LootItem fromBasicItem(int itemId, int quantity, String itemName)
+	{
 		return new LootItem(itemId, basicExamineText(itemName, quantity), quantity, itemName);
 	}
 

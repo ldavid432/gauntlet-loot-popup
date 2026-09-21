@@ -292,7 +292,8 @@ public class GauntletLootPlugin extends Plugin
 			}
 		}
 		// Resource Packs enabled
-		else if (Objects.equals(configChanged.getGroup(), "runelite") && Objects.equals(configChanged.getKey(), "resourcepacksplugin")) {
+		else if (Objects.equals(configChanged.getGroup(), "runelite") && Objects.equals(configChanged.getKey(), "resourcepacksplugin"))
+		{
 			boolean newValue = Boolean.parseBoolean(configChanged.getNewValue());
 
 			Plugin resourcePacksPlugin = pluginManager.getPlugins().stream()
@@ -432,7 +433,10 @@ public class GauntletLootPlugin extends Plugin
 				}
 
 				overlay.setPreferredSize(isCustomBackgroundEnabled);
-				if (overlay.getPreferredLocation() == null) overlay.setPreferredLocation();
+				if (overlay.getPreferredLocation() == null)
+				{
+					overlay.setPreferredLocation();
+				}
 
 				loot = Loot.of(source, lootItems, kc, config, itemManager, () -> {
 					log.debug("Playing rare item sound for Gauntlet loot");
@@ -446,7 +450,7 @@ public class GauntletLootPlugin extends Plugin
 				}
 			});
 	}
-	
+
 	private void sendChatMessage(Collection<ItemStack> lootItems)
 	{
 		lootItems.stream()
