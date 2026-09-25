@@ -457,14 +457,14 @@ public class GauntletLootPlugin extends Plugin
 			.map(stack -> {
 				if (config.showHighAlchValue())
 				{
-					return itemManager.getItemComposition(stack.getId()).getHaPrice() * stack.getQuantity();
+					return (long) itemManager.getItemComposition(stack.getId()).getHaPrice() * stack.getQuantity();
 				}
 				else
 				{
-					return itemManager.getItemPrice(stack.getId()) * stack.getQuantity();
+					return (long) itemManager.getItemPrice(stack.getId()) * stack.getQuantity();
 				}
 			})
-			.reduce(Integer::sum)
+			.reduce(Long::sum)
 			.ifPresent(sum -> {
 				// Message structure copied from RuneLite BarrowsPlugin.java
 				final ChatMessageBuilder message = new ChatMessageBuilder()

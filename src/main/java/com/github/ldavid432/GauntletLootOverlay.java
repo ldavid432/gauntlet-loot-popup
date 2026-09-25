@@ -235,7 +235,6 @@ public class GauntletLootOverlay extends Overlay
 		}
 	}
 
-	// TODO: Maybe get rid of all these asserts?
 	private void renderSpriteBackground(Graphics2D graphics) throws ExecutionException
 	{
 		Shape originalClip = graphics.getClip();
