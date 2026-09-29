@@ -461,7 +461,7 @@ public class GauntletLootPlugin extends Plugin
 				}
 				else
 				{
-					return (long) itemManager.getItemPrice(stack.getId()) * stack.getQuantity();
+					return itemManager.getItemPrice(stack.getId()) * stack.getQuantity();
 				}
 			})
 			.reduce(Long::sum)
